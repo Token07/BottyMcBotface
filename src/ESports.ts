@@ -215,6 +215,9 @@ export default class ESportsAPI {
             if (output.trim().length === 0)
                 continue;
 
+            if (output.length > 940) {
+                 output = "Too many games to display\n"
+            }
             embed.fields.push({
                 name: league,
                 value: output + `[More about ${league} here](${this.getUrlByLeague(games[0])})\n`,
@@ -222,7 +225,7 @@ export default class ESportsAPI {
             });
         }
 
-        channel.send({ embed });
+        channel.send({ embed }).catch(console.error);
     }
 
     private async loadData() {
