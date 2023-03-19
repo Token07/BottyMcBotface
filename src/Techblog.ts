@@ -38,7 +38,7 @@ export default class Techblog {
                     return;
                 }
                 else {
-                    this.channel = await guild!.channels.create(this.sharedSettings.techBlog.channel, { type: "text" }) as Discord.TextChannel;
+                    this.channel = await guild!.channels.create(this.sharedSettings.techBlog.channel, { type: "GUILD_TEXT" }) as Discord.TextChannel;
                 }
             }
 

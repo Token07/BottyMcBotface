@@ -129,7 +129,7 @@ export default class Pickem {
                         console.error("Pickem ran into an error: We don't have an e-sports channel but we're on production!");
                     }
                     else {
-                        await guild!.channels.create(channel, { type: "text" });
+                        await guild!.channels.create(channel, { type: "GUILD_TEXT" });
                     }
                 }
             }, 1000);

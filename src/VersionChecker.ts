@@ -42,7 +42,7 @@ export default class VersionChecker {
                 return;
             }
             else {
-                channel = await guild!.channels.create(this.sharedSettings.forum.channel, { type: "text" });
+                channel = await guild!.channels.create(this.sharedSettings.forum.channel, { type: "GUILD_TEXT" });
             }
         }
 
