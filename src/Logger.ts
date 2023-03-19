@@ -106,9 +106,11 @@ export default class Logger {
         this.oldLog(message, ...optionalParams);
 
         try {
-            this.logChannel.send(`[${(new Date()).toUTCString()}] Log: ${message.toString()}`, { split: true });
+            let chunks = Discord.Util.splitMessage(`[${(new Date()).toUTCString()}] Log: ${message.toString()}`)
+            chunks.forEach(chunk => { this.errorChannel.send(chunk)})
             for (let i = 0; i < optionalParams.length; i++) {
-                this.logChannel.send(`[${(new Date()).toUTCString()}] Log param ${(i + 1)}: ${optionalParams.toString()}`, { split: true });
+                let chunks = Discord.Util.splitMessage(`[${(new Date()).toUTCString()}] Log param ${(i + 1)}: ${optionalParams.toString()}`)
+                chunks.forEach(chunk => { this.errorChannel.send(chunk)})
             }
         } catch (e) {
             this.oldError(`Error trying to send a log message: ${e.toString()}`);
@@ -125,7 +127,8 @@ export default class Logger {
             }
 
             error += new Error().stack;
-            this.errorChannel.send(error, { split: true });
+            let chunks = Discord.Util.splitMessage(error)
+            chunks.forEach(chunk => { this.errorChannel.send(chunk)})
         } catch (e) {
             this.oldError(`Error trying to send a warning message: ${e.toString()}`);
         }
@@ -141,7 +144,8 @@ export default class Logger {
             }
 
             error += new Error("").stack;
-            this.errorChannel.send(error, { split: true });
+            let chunks = Discord.Util.splitMessage(error)
+            chunks.forEach(chunk => { this.errorChannel.send(chunk)})
         } catch (e) {
             this.oldError(`Error trying to send an error message: ${e.toString()}`);
         }
