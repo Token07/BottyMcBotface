@@ -363,7 +363,7 @@ export default class Info {
         if (!firstPage)
             return;
 
-        let replies = await message.channel.send({ embed: firstPage });
+        let replies = await message.channel.send({ embeds: [firstPage] });
         let reply: Discord.Message = Array.isArray(replies) ? replies[0] : replies;
 
         this.categorisedMessages[reply.id] = new CategorisedMessage(pages);
@@ -378,7 +378,7 @@ export default class Info {
 
                 const page = this.categorisedMessages[listener.message.id].setPage(emoji);
 
-                listener.message.edit({ embed: page });
+                listener.message.edit({ embeds: [page] });
             },
         });
 

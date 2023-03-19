@@ -229,7 +229,7 @@ export default class GameData {
         if (typeof result === "string") {
             message.channel.send(result);
         } else {
-            message.channel.send(this.buildEmbed(result));
+            message.channel.send({embeds: [this.buildEmbed(result)]});
         }
     }
 

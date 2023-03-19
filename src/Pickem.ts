@@ -205,7 +205,7 @@ export default class Pickem {
         }
 
         embed.addField("Leaderboard", list);
-        channel.send({ embed });
+        channel.send({ embeds: [embed] });
     }
 
     public async getGroupPicks(series: number, user: number): Promise<PickemGroupPick> {
@@ -347,7 +347,7 @@ export default class Pickem {
     public doPrint(channel: Discord.TextChannel, group: PickemGroupPick, bracket: PickemBracketPick) {
         const bracketOutput = this.generateBracket(bracket);
         if (bracketOutput === null)
-            channel.send({ embed: this.generateEmbedGroupPickem(group) });
+            channel.send({ embeds: [this.generateEmbedGroupPickem(group)] });
         else
             channel.send(bracketOutput);
     }

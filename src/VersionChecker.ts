@@ -80,7 +80,7 @@ export default class VersionChecker {
                 .setDescription(`Version ${this.data.latestDataDragonVersion} of DDragon has hit the CDN.\nThe download is available here:\n${downloadLink}`)
                 .setThumbnail(this.sharedSettings.versionChecker.dataDragonThumbnail);
 
-            this.channel.send({ embed });
+            this.channel.send({ embeds: [embed] });
         } catch (e) {
             console.error("Ddragon fetch error: " + e.message);
         }
@@ -151,7 +151,7 @@ export default class VersionChecker {
                 .setURL(validPatchNotes)
                 .setThumbnail(this.sharedSettings.versionChecker.gameThumbnail);
 
-            this.channel.send({ embed });
+            this.channel.send({ embeds: [embed] });
         } catch (e) {
             console.error("Game version fetch error: " + e.message);
         }

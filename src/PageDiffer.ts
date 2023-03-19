@@ -132,7 +132,7 @@ export default class PageDiffer {
                 .setURL(this.sharedSettings.botty.webServer.relativeLiveLocation + folderName)
                 .setThumbnail(this.sharedSettings.pageDiffer.embedImageUrl);
 
-            this.channel.send({ embed });
+            this.channel.send({ embeds: [embed] });
         }
 
         if (this.timeOut !== null) clearTimeout(this.timeOut);

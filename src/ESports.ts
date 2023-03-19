@@ -222,7 +222,7 @@ export default class ESportsAPI {
             });
         }
 
-        channel.send({ embed }).catch(console.error);
+        channel.send({ embeds: embed }).catch(console.error);
     }
 
     private async loadData() {

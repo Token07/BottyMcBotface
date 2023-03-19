@@ -225,6 +225,6 @@ export default class RiotAPILibraries {
             return;
         }
 
-        editMessage.edit({ embed });
+        editMessage.edit({ embeds: [embed] });
     }
 }

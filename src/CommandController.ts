@@ -167,7 +167,7 @@ export default class CommandController {
         }
 
         const data = this.getHelp(isAdmin);
-        data.forEach(embed => message.channel.send({ embed }));
+        data.forEach(embed => message.channel.send({embeds: [embed] }));
     }
 
     public registerCommand(newCommand: Command, commandHandler: SingleCommand) {
