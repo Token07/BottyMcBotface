@@ -69,7 +69,7 @@ export default class Logger {
                 return;
             }
             else {
-                logChannel = await guild!.channels.create(environment.logChannel, { type: "text" }) as Discord.TextChannel;
+                logChannel = await guild!.channels.create(environment.logChannel, { type: "GUILD_TEXT" }) as Discord.TextChannel;
             }
         }
         this.logChannel = logChannel as Discord.TextChannel;

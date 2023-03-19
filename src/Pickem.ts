@@ -111,7 +111,7 @@ interface PickemPick {
 export default class Pickem {
     private bot: Discord.Client;
     private settings: SharedSettings;
-    private esportsChannel: Discord.GuildChannel | null = null;
+    private esportsChannel: Discord.GuildBasedChannel | null = null;
     private currentMemberList: PickemUser[] = [];
 
     constructor(bot: Discord.Client, settings: SharedSettings) {
@@ -123,7 +123,7 @@ export default class Pickem {
                 const channel = this.settings.esports.printChannel;
 
                 const guild = this.bot.guilds.cache.get(this.settings.server.guildId);
-                this.esportsChannel = guild!.channels.cache.find(c => c.name === channel) || null;
+                this.esportsChannel = guild!.channels.cache.find(c => c.name === channel && c.type == "GUILD_TEXT") || null;
                 if (this.esportsChannel == null) {
                     if (this.settings.botty.isProduction) {
                         console.error("Pickem ran into an error: We don't have an e-sports channel but we're on production!");

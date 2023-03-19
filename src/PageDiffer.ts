@@ -49,7 +49,7 @@ export default class PageDiffer {
                 return;
             }
             else {
-                channel = await guild!.channels.create(this.sharedSettings.pageDiffer.channel, { type: "text" });
+                channel = await guild!.channels.create(this.sharedSettings.pageDiffer.channel, { type: "GUILD_TEXT" });
             }
         }
 

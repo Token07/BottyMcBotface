@@ -63,7 +63,7 @@ interface EsportsAPIEventListResponse {
 export default class ESportsAPI {
     private bot: Discord.Client;
     private settings: SharedSettings;
-    private esportsChannel: Discord.GuildChannel | null = null;
+    private esportsChannel: Discord.GuildBasedChannel | null = null;
 
     private schedule: Map<string, Map<string, ESportsLeagueSchedule[]>> = new Map();
     private postInfoTimeOut: NodeJS.Timer | null;
@@ -77,13 +77,13 @@ export default class ESportsAPI {
 
             const channel = this.settings.esports.printChannel;
             const guild = this.bot.guilds.cache.get(this.settings.server.guildId);
-            this.esportsChannel = guild!.channels.cache.find((c) => c.name === channel) || null;
+            this.esportsChannel = guild!.channels.cache.find((c) => c.name === channel && c.type == "GUILD_TEXT") || null;
             if (this.esportsChannel == null) {
                 if (this.settings.botty.isProduction) {
                     console.error("Esports API ran into an error: We don't have an esports channel but we're on production!");
                 }
                 else {
-                    this.esportsChannel = await guild!.channels.create(channel, { type: "text" });
+                    this.esportsChannel = await guild!.channels.create(channel, { type: "GUILD_TEXT" });
                 }
             }
 
@@ -222,7 +222,7 @@ export default class ESportsAPI {
             });
         }
 
-        channel.send({ embeds: embed }).catch(console.error);
+        channel.send({ embeds: [embed] }).catch(console.error);
     }
 
     private async loadData() {
