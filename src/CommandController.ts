@@ -66,12 +66,6 @@ export interface CommandList {
         all: Command,
         note: Command,
     };
-    officeHours: {
-        open: Command;
-        close: Command;
-        ask: Command;
-        ask_for: Command;
-    };
     riotApiLibraries: Command;
     apiStatus: Command;
     endpointManager: {

@@ -6,7 +6,6 @@ The Riot Games API Discord Bot. This is the bot that helps out with your questio
 
 ## Available commands
 
-- **!ask**: Ask a question at the next #office-hours
 - **!esports**: Prints out a list of esports games.
 - **!help**: Prints all the commands
 - **!lib, !libs, !libraries**: Print a list of the public libraries
@@ -22,11 +21,6 @@ The Riot Games API Discord Bot. This is the bot that helps out with your questio
 ##### Admin-only commands
 
 - **!active_keys, !activekeys**: Prints a list of keys that botty have seen, and that are still active
-- **!ask_for**: Ask a question for someone else at the next #office-hours
-- **!close**: Close #office-hours
-- **!open**: Open #office-hours
-- **!question list**: Print the list of questions waiting for #office-hours
-- **!question remove**: Remove a question from the list waiting for #office-hours
 - **!refresh_thinking**: Reloads the thinking emojis
 - **!restart, !reboot**: Restarts Botty.
 - **!toggle_command**: Enables or disables commands (!toggle_command {command})
