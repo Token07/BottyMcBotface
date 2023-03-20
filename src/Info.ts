@@ -353,7 +353,7 @@ export default class Info {
 
             for (const item of categoryItems) {
                 const content = item.message.length > maxLength ? item.message.substr(0, maxLength - 3) + "..." : item.message;
-                page.addField("!note " + item.command, content, false);
+                page.addFields({name: "!note " + item.command, value: content});
             }
 
             if (!firstPage) firstPage = page;

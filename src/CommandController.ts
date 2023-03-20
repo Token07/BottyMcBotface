@@ -148,7 +148,7 @@ export default class CommandController {
                 data.push(embed);
             }
 
-            embed!.addField(mapped[i].title, mapped[i].desc);
+            embed!.addFields({name: mapped[i].title, value: mapped[i].desc});
         }
         return data;
     }

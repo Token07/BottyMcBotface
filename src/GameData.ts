@@ -281,12 +281,12 @@ export default class GameData {
             if (valueString !== "") {
                 if (Array.isArray(value)) {
                     if (value.length > 4) {
-                        embed.addField(keyString, `${value.slice(0, 4).join(", ")} + ${value.length - 4} more…`);
+                        embed.addFields({name: keyString, value: `${value.slice(0, 4).join(", ")} + ${value.length - 4} more…`});
                     } else {
-                        embed.addField(keyString, `${value.join(", ")}`);
+                        embed.addFields({name: keyString, value: `${value.join(", ")}`});
                     }
                 } else {
-                    embed.addField(keyString, valueString, true);
+                    embed.addFields({name: keyString, value: valueString, inline: true});
                 }
             }
         }
