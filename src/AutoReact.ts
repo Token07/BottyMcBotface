@@ -24,7 +24,7 @@ export default class AutoReact {
         console.log("Successfully loaded ignore reaction file.");
 
         this.bot.on("ready", this.onConnect.bind(this));
-        this.bot.on("message", this.onMessage.bind(this));
+        this.bot.on("messageCreate", this.onMessage.bind(this));
     }
 
     public onConnect() {
