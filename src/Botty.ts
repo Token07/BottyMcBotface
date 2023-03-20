@@ -15,7 +15,7 @@ export interface BottySettings {
 }
 
 export default class Botty {
-    public readonly client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MEMBERS] });
+    public readonly client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Discord.Intents.FLAGS.GUILD_MEMBERS] });
     private personalSettings: PersonalSettings;
     private sharedSettings: SharedSettings;
 
