@@ -75,7 +75,7 @@ export default class Info {
 
                 const emoji = botty.client.emojis.cache.get(category.icon);
                 if (!emoji) {
-                    console.warn(`Cannot find emoji ${category} for the info categories!`);
+                    console.warn(`Cannot find emoji ${category.icon} for the info categories!`);
                     continue;
                 }
 
