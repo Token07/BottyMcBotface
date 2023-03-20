@@ -48,7 +48,7 @@ export default class KeyFinder {
             console.log("KeyFinder extension loaded.");
             this.testAllKeys();
         });
-        this.bot.on("message", this.onMessage.bind(this));
+        this.bot.on("messageCreate", this.onMessage.bind(this));
     }
 
     public onMessage(incomingMessage: Discord.Message) {

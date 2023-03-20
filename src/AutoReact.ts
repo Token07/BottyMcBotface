@@ -33,7 +33,7 @@ export default class AutoReact {
         const emoji = this.bot.emojis.cache.get(this.sharedSettings.autoReact.emoji);
         if (emoji instanceof Discord.Emoji) {
             this.greetingEmoji = emoji;
-            this.bot.on("message", this.onGreeting.bind(this));
+            this.bot.on("messageCreate", this.onGreeting.bind(this));
             console.log("Bot has succesfully loaded greetings.");
         } else {
             console.error(`Unable to find the greeting emoji '${this.sharedSettings.autoReact.emoji}'.`);

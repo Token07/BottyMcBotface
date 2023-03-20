@@ -87,7 +87,7 @@ export default class CommandController {
 
         this.commandStatuses = fileBackedObject(commandData, "www/" + commandData);
 
-        bot.on("message", this.handleCommands.bind(this));
+        bot.on("messageCreate", this.handleCommands.bind(this));
     }
 
     public onToggle(message: Discord.Message, isAdmin: boolean, command: string, args: string[]) {
