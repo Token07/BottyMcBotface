@@ -2,9 +2,9 @@ name: Botty
 
 on:
   push:
-    branches: [ "gh-action-test" ]
+    branches: [ "gh-action-test", "master" ]
   pull_request:
-    branches: [ "gh-action-test" ]
+    branches: [ "gh-action-test", "master" ]
 
 jobs:
   build:
