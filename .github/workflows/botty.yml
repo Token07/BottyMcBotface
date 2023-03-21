@@ -1,0 +1,23 @@
+name: Botty
+
+on:
+  push:
+    branches: [ "gh-action-test" ]
+  pull_request:
+    branches: [ "gh-action-test" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Setup node
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18.x
+        cache: 'npm'
+    - name: Install Packages
+      run: npm install
+    - name: Build Botty
+      run: tsc -p .
