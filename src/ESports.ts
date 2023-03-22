@@ -226,46 +226,53 @@ export default class ESportsAPI {
     }
 
     private async loadData() {
-        const leagueLists = await (await fetch("https://esports-api.lolesports.com/persisted/gw/getLeagues?hl=en-US", {
-            headers: { "x-api-key": "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z" },
-        })).json() as EsportsAPILeagueResponse;
+        try {
+            const leagueLists = await (await fetch("https://esports-api.lolesports.com/persisted/gw/getLeagues?hl=en-US", {
+                headers: { "x-api-key": "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z" },
+            })).json() as EsportsAPILeagueResponse;
 
-        const leagueIds = leagueLists.data.leagues.map(l => l.id).reduce((prev, next) => prev + "," + next, "");
+            const leagueIds = leagueLists.data.leagues.map(l => l.id).reduce((prev, next) => prev + "," + next, "");
 
-        const events = await (await fetch(`https://esports-api.lolesports.com/persisted/gw/getEventList?hl=en-US&leagueId=${leagueIds}`, {
-            headers: { "x-api-key": "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z" },
-        })).json() as EsportsAPIEventListResponse;
+            const events = await (await fetch(`https://esports-api.lolesports.com/persisted/gw/getEventList?hl=en-US&leagueId=${leagueIds}`, {
+                headers: { "x-api-key": "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z" },
+            })).json() as EsportsAPIEventListResponse;
 
-        const schedule: Map<string, Map<string, ESportsLeagueSchedule[]>> = new Map();
-        events.data.esports.events.forEach(e => {
-            const gameData: ESportsLeagueSchedule = {
-                league: e.league.slug,
-                url: e.league.slug,
-                time: e.startTime,
-                teamA: e.match.teams[0].code,
-                teamB: e.match.teams[1].code,
-            };
+            const schedule: Map<string, Map<string, ESportsLeagueSchedule[]>> = new Map();
+            events.data.esports.events.forEach(e => {
+                const gameData: ESportsLeagueSchedule = {
+                    league: e.league.slug,
+                    url: e.league.slug,
+                    time: e.startTime,
+                    teamA: e.match.teams[0].code,
+                    teamB: e.match.teams[1].code,
+                };
 
-            const dateSplit = e.startTime.split("-");
-            const realDate = `${dateSplit[0]} ${dateSplit[1]} ${dateSplit[2].split("T")[0]}`;
+                const dateSplit = e.startTime.split("-");
+                const realDate = `${dateSplit[0]} ${dateSplit[1]} ${dateSplit[2].split("T")[0]}`;
 
-            if (!schedule.has(realDate)) {
-                schedule.set(realDate, new Map());
-            }
+                if (!schedule.has(realDate)) {
+                    schedule.set(realDate, new Map());
+                }
 
-            if (!schedule.get(realDate)!.has(e.league.name)) {
-                schedule.get(realDate)!.set(e.league.name, []);
-            }
+                if (!schedule.get(realDate)!.has(e.league.name)) {
+                    schedule.get(realDate)!.set(e.league.name, []);
+                }
 
-            schedule.get(realDate)!.get(e.league.name)!.push(gameData);
-        });
+                schedule.get(realDate)!.get(e.league.name)!.push(gameData);
+            });
 
-        this.schedule = schedule;
-        if (this.loadDataTimeOut) {
-            clearTimeout(this.loadDataTimeOut);
-            this.loadDataTimeOut = null;
+            this.schedule = schedule;
         }
-        this.loadDataTimeOut = setTimeout(this.loadData.bind(this), this.settings.esports.updateTimeout);
+        catch (e) {
+            console.error(`I tried to update the list of ESports matches but got an error: ${e.message}`);
+        }
+        finally {
+            if (this.loadDataTimeOut) {
+                clearTimeout(this.loadDataTimeOut);
+                this.loadDataTimeOut = null;
+            }
+            this.loadDataTimeOut = setTimeout(this.loadData.bind(this), this.settings.esports.updateTimeout);
+        }
     }
 
     private getUrlByLeague(leagueName: ESportsLeagueSchedule) {
