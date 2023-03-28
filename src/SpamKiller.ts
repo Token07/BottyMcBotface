@@ -12,12 +12,23 @@ class Violator {
     public violations = 0;
 }
 
+interface Violations {
+    authorId: string;
+    time: number;
+    messageId: string,
+    messageContents: string,
+    channelId: string,
+    messageRemoved?: boolean
+}
+
 export default class SpamKiller {
     private bot: Discord.Client;
     private guild: Discord.Guild;
     private role: Discord.Role;
 
     private violators: Violator[] = [];
+    private violations: Violations[] = [];
+    private violationCleanUpTimer : NodeJS.Timer;
     private sharedSettings: SharedSettings;
 
     constructor(bot: Discord.Client, sharedSettings: SharedSettings) {
@@ -43,6 +54,8 @@ export default class SpamKiller {
             return;
         }
         this.role = role;
+
+        this.violationCleanUpTimer = setTimeout(this.violationCleanup.bind(this), 15 * 60 * 1000);
     }
 
     async onMessage(message: Discord.Message) {
@@ -150,6 +163,34 @@ export default class SpamKiller {
         if (!member)
             throw new Error(`Unable to find member that wrote the message '${message.content}' (${message.author.username})`);
 
+        this.violations.push({
+            authorId: member.id,
+            time: message.createdTimestamp,
+            messageId: message.id,
+            messageContents: message.cleanContent,
+            channelId: message.channel.id
+        });
+
+        const memberViolations = this.violations.filter(v => v.authorId === message.author.id && (Date.now() - 2 * 60 * 1000) > v.time);
+        const violationCount = memberViolations.length
+        const violationUniqueChannelCount = new Set(memberViolations.map(v => v.channelId)).size;
+        if (violationUniqueChannelCount > 5) { // Probably spamming all the channels
+            memberViolations.forEach(violation => {
+                if (violation.messageRemoved) return;
+                const channel = guild.channels.cache.get(violation.channelId) as Discord.TextChannel;
+                if (!channel || channel.type !== "text") return;
+                channel.messages.fetch(violation.messageId)?.then(msg => msg.delete()).then(() => violation.messageRemoved = true).catch(console.error);
+            })
+            // Revoke ok role if they have it
+            try {
+                if (member.roles.cache.has(this.role.id))
+                    await member.roles.remove(this.role);
+                    console.log(`SpamKiller: Removed ok role from ${message.author.username}#${message.author.discriminator}`);
+            }
+            catch {}
+            console.log(`SpamKiller: ${message.author.username}#${message.author.discriminator} has ${violationCount} violations in the last 3 minutes`);
+        }
+
         if (member.roles.cache.filter(r => !this.sharedSettings.spam.ignoredRoles.includes(r.id)).size > 1) { // Only act on people without roles
             console.log(`SpamKiller: ${message.author.username}#${message.author.discriminator}'s message triggered our spam detector, but they've got ${member.roles.cache.size} roles. (https://discordapp.com/channels/${message.guild?.id}/${message.channel.id}/${message.id})`);
             return;
@@ -219,5 +260,9 @@ export default class SpamKiller {
         const deletedId = this.violators.indexOf(deletedEntry);
         if (deletedId >= 0)
             this.violators.splice(deletedId, 1);
+    }
+    private violationCleanup() {
+        this.violations = this.violations.filter(violation => (Date.now() - 15 * 60 * 1000) > violation.time);
+        this.violationCleanUpTimer = setTimeout(this.violationCleanup.bind(this), 15 * 60 * 1000);
     }
 }
