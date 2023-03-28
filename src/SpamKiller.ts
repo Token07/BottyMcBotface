@@ -171,7 +171,7 @@ export default class SpamKiller {
             channelId: message.channel.id
         });
 
-        const memberViolations = this.violations.filter(v => v.authorId === message.author.id && (Date.now() - 2 * 60 * 1000) > v.time);
+        const memberViolations = this.violations.filter(v => v.authorId === message.author.id && (Date.now() - 3 * 60 * 1000) > v.time);
         const violationCount = memberViolations.length
         const violationUniqueChannelCount = new Set(memberViolations.map(v => v.channelId)).size;
         if (violationUniqueChannelCount > 5) { // Probably spamming all the channels
