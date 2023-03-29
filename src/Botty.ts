@@ -3,7 +3,7 @@ import { PersonalSettings, SharedSettings } from "./SharedSettings";
 import { levenshteinDistance } from "./LevenshteinDistance";
 
 import Discord = require("discord.js");
-import { GuildMember } from "discord.js";
+import { GatewayIntentBits, GuildMember } from "discord.js";
 
 import { exec } from "child_process";
 
@@ -15,7 +15,15 @@ export interface BottySettings {
 }
 
 export default class Botty {
-    public readonly client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Discord.Intents.FLAGS.GUILD_MEMBERS] });
+    public readonly client = new Discord.Client({ intents: [
+        GatewayIntentBits.DirectMessages,
+        GatewayIntentBits.DirectMessageReactions,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildMessageReactions,
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.MessageContent,
+    ]});
     private personalSettings: PersonalSettings;
     private sharedSettings: SharedSettings;
 
@@ -64,7 +72,7 @@ export default class Botty {
         this.client.on("messageDelete", (message: Discord.Message) => {
 
             if (message.author.bot) return; // Ignore bot in general
-            if (message.channel.type === "DM") return; // Don't output DMs
+            if (message.channel.type === Discord.ChannelType.DM) return; // Don't output DMs
 
             console.log(`${message.author.username}'s (${message.author.id}) message in ${message.channel} was deleted. Contents: \n${message.cleanContent}\n`);
         });
@@ -87,7 +95,7 @@ export default class Botty {
 
             if (levenshteinDistance(oldMessage.content, newMessage.content) === 0) return; // To prevent page turning and embed loading to appear in changelog
             if (oldMessage.author.bot) return; // Ignore bot in general
-            if (oldMessage.channel.type === "DM") return; // Don't output DMs
+            if (oldMessage.channel.type === Discord.ChannelType.DM) return; // Don't output DMs
 
             console.log(`${oldMessage.author.username}'s message in ${oldMessage.channel} was changed from: \n${oldMessage.cleanContent}\n\nTo:\n${newMessage.cleanContent}`);
         });

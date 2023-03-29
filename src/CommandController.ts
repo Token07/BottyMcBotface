@@ -105,7 +105,7 @@ export default class CommandController {
         }
     }
 
-    public getHelp(isAdmin: boolean = false): Discord.MessageEmbed[] {
+    public getHelp(isAdmin: boolean = false): Discord.EmbedBuilder[] {
         const toString = (holder: CommandHolder) => {
 
             let title = "";
@@ -137,14 +137,14 @@ export default class CommandController {
             .map(holder => toString(holder))
             .sort((a, b) => a.title.localeCompare(b.title));
 
-        const data: Discord.MessageEmbed[] = [];
+        const data: Discord.EmbedBuilder[] = [];
         let pageIndex = 0;
-        let embed: Discord.MessageEmbed;
+        let embed: Discord.EmbedBuilder;
 
         for (let i = 0; i < mapped.length; i++) {
             // rich embeds have a 25 field limit
             if (i % 25 === 0) {
-                embed = new Discord.MessageEmbed({ title: `Commands (page ${++pageIndex})` });
+                embed = new Discord.EmbedBuilder({ title: `Commands (page ${++pageIndex})` });
                 data.push(embed);
             }
 

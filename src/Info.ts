@@ -343,12 +343,12 @@ export default class Info {
             return;
         }
 
-        let firstPage: Discord.MessageEmbed | null = null;
-        const pages: { [emoji: string]: Discord.MessageEmbed } = {};
+        let firstPage: Discord.EmbedBuilder | null = null;
+        const pages: { [emoji: string]: Discord.EmbedBuilder } = {};
         for (const category of this.categories) {
             const categoryItems = this.infos.filter(i => i.categoryId === category.icon);
 
-            const page = new Discord.MessageEmbed();
+            const page = new Discord.EmbedBuilder();
             page.setTitle(category.explanation);
 
             for (const item of categoryItems) {

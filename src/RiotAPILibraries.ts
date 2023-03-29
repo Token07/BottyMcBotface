@@ -208,13 +208,16 @@ export default class RiotAPILibraries {
             return;
         }
 
-        const embed = new Discord.MessageEmbed({ title: `List of libraries for ${language}:` });
+        const embed = new Discord.EmbedBuilder({ title: `List of libraries for ${language}:` });
         for (const desc of libraryDescriptions) {
             if (!desc.library) {
                 // https://github.com/Microsoft/TypeScript/issues/18562
                 continue;
             }
-            embed.addField(`${desc.library.repo} (★ ${desc.stars ? desc.stars : "0"})`, `${desc.library.description ? desc.library.description + "\n" : " "}${desc.links.join(", ")}`);
+            embed.addFields([{
+                name: `${desc.library.repo} (★ ${desc.stars ? desc.stars : "0"})`,
+                value: `${desc.library.description ? desc.library.description + "\n" : " "}${desc.links.join(", ")}`
+            }]);
         }
 
         let editMessage = await editMessagePromise;

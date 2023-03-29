@@ -123,13 +123,13 @@ export default class Pickem {
                 const channel = this.settings.esports.printChannel;
 
                 const guild = this.bot.guilds.cache.get(this.settings.server.guildId);
-                this.esportsChannel = guild!.channels.cache.find(c => c.name === channel && c.type == "GUILD_TEXT") || null;
+                this.esportsChannel = guild!.channels.cache.find(c => c.name === channel && c.type === Discord.ChannelType.GuildText) || null;
                 if (this.esportsChannel == null) {
                     if (this.settings.botty.isProduction) {
                         console.error("Pickem ran into an error: We don't have an e-sports channel but we're on production!");
                     }
                     else {
-                        await guild!.channels.create(channel, { type: "GUILD_TEXT" });
+                        await guild!.channels.create({name: channel, type: Discord.ChannelType.GuildText });
                     }
                 }
             }, 1000);
@@ -189,7 +189,7 @@ export default class Pickem {
         const points = await this.getPickemPoints(this.settings.pickem.worldsId, ids);
         const sorted = points.sort((a, b) => b.totalPoints - a.totalPoints);
 
-        const embed = new Discord.MessageEmbed();
+        const embed = new Discord.EmbedBuilder();
         embed.setTitle("Top scores:");
 
         let list = "";
@@ -204,7 +204,7 @@ export default class Pickem {
             list += `${place}. ${sorted[i].gameName}: ${sorted[i].totalPoints}\n`;
         }
 
-        embed.addField("Leaderboard", list);
+        embed.addFields([{name: "Leaderboard", value: list}]);
         channel.send({ embeds: [embed] });
     }
 
@@ -225,7 +225,7 @@ export default class Pickem {
     }
 
     public generateEmbedGroupPickem(match: PickemGroupPick) {
-        const embed = new Discord.MessageEmbed();
+        const embed = new Discord.EmbedBuilder();
         embed.setTitle(match.user.id >= 0 ? `${match.user.gameName}'s pickem` : "Current standings");
         let formattingIndex = 0;
         for (const group of match.groups) {
@@ -235,10 +235,10 @@ export default class Pickem {
                 value += `${index++}. ${team.name} (${team.wins}-${team.losses})\n`;
             }
             const pointsField = group.userPoints !== Number.POSITIVE_INFINITY ? `(${group.userPoints} points)` : "";
-            embed.addField(`${group.name} ${pointsField}`, value, true);
+            embed.addFields([{name: `${group.name} ${pointsField}`, value: value, inline: true}]);
 
             if (++formattingIndex % 2 === 0) {
-                embed.addField('\u200b', '\u200b')
+                embed.addFields([{name: '\u200b', value: '\u200b'}]);
             }
         }
 

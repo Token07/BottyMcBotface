@@ -42,7 +42,7 @@ export default class VersionChecker {
                 return;
             }
             else {
-                channel = await guild!.channels.create(this.sharedSettings.forum.channel, { type: "GUILD_TEXT" });
+                channel = await guild!.channels.create({name: this.sharedSettings.forum.channel, type: Discord.ChannelType.GuildText });
             }
         }
 
@@ -74,7 +74,7 @@ export default class VersionChecker {
             this.data.latestDataDragonVersion = dataDragonVersion[0];
             const downloadLink = `http://ddragon.leagueoflegends.com/cdn/dragontail-${this.data.latestDataDragonVersion}.tgz`;
 
-            const embed = new Discord.MessageEmbed()
+            const embed = new Discord.EmbedBuilder()
                 .setColor(0x42f456)
                 .setTitle("New DDragon version!")
                 .setDescription(`Version ${this.data.latestDataDragonVersion} of DDragon has hit the CDN.\nThe download is available here:\n${downloadLink}`)
@@ -144,7 +144,7 @@ export default class VersionChecker {
 
             this.data.latestGameVersion = `${lastNewValidMajor.toString()}.${lastNewValidMinor.toString()}`;
 
-            const embed = new Discord.MessageEmbed()
+            const embed = new Discord.EmbedBuilder()
                 .setColor(0xf442e5)
                 .setTitle("New League of Legends version!")
                 .setDescription(`Version ${this.data.latestGameVersion} of League of Legends has posted its patch notes. You can expect the game to update soon.\n\nYou can find the notes here:\n${validPatchNotes}`)

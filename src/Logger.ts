@@ -69,7 +69,7 @@ export default class Logger {
                 return;
             }
             else {
-                logChannel = await guild!.channels.create(environment.logChannel, { type: "GUILD_TEXT" }) as Discord.TextChannel;
+                logChannel = await guild!.channels.create({name: environment.logChannel, type: Discord.ChannelType.GuildText}) as Discord.TextChannel;
             }
         }
         this.logChannel = logChannel as Discord.TextChannel;
@@ -106,10 +106,10 @@ export default class Logger {
         this.oldLog(message, ...optionalParams);
 
         try {
-            let chunks = Discord.Util.splitMessage(`[${(new Date()).toUTCString()}] Log: ${message.toString()}`)
+            let chunks = `[${(new Date()).toUTCString()}] Log: ${message.toString()}`.match(/.{1,2000}/g) || [message.toString()];
             chunks.forEach(chunk => { this.errorChannel.send(chunk)})
             for (let i = 0; i < optionalParams.length; i++) {
-                let chunks = Discord.Util.splitMessage(`[${(new Date()).toUTCString()}] Log param ${(i + 1)}: ${optionalParams.toString()}`)
+                let chunks = `[${(new Date()).toUTCString()}] Log param ${(i + 1)}: ${optionalParams.toString()}`.match(/.{1,2000}/g) || [message.toString()];
                 chunks.forEach(chunk => { this.errorChannel.send(chunk)})
             }
         } catch (e) {
@@ -127,7 +127,7 @@ export default class Logger {
             }
 
             error += new Error().stack;
-            let chunks = Discord.Util.splitMessage(error)
+            let chunks = error.split("", 2000)
             chunks.forEach(chunk => { this.errorChannel.send(chunk)})
         } catch (e) {
             this.oldError(`Error trying to send a warning message: ${e.toString()}`);
@@ -144,7 +144,7 @@ export default class Logger {
             }
 
             error += new Error("").stack;
-            let chunks = Discord.Util.splitMessage(error)
+            let chunks = error.match(/.{1,2000}/g) || [message.toString()];
             chunks.forEach(chunk => { this.errorChannel.send(chunk)})
         } catch (e) {
             this.oldError(`Error trying to send an error message: ${e.toString()}`);

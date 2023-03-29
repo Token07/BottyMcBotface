@@ -84,7 +84,7 @@ export default class Admin {
                 return;
             }
             else {
-                adminChannel = await guild.channels.create(this.sharedSettings.server.guruChannel, { type: "GUILD_TEXT" });
+                adminChannel = await guild.channels.create({name: this.sharedSettings.server.guruChannel, type: Discord.ChannelType.GuildText});
             }
         }
 

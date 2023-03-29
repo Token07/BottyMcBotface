@@ -20,7 +20,7 @@ export default class UserIntroduction {
     private bot: Discord.Client;
     private sharedSettings: SharedSettings;
     private messageContents: string;
-    private commandContents: Discord.MessageEmbed[];
+    private commandContents: Discord.EmbedBuilder[];
     private commandController: CommandController;
     private channels: { [lang: string]: Discord.TextChannel | null } = {};
     private data: UserIntroductionData;
