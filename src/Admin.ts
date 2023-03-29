@@ -84,7 +84,7 @@ export default class Admin {
                 return;
             }
             else {
-                adminChannel = await guild.channels.create(this.sharedSettings.server.guruChannel, { type: "text" });
+                adminChannel = await guild.channels.create({name: this.sharedSettings.server.guruChannel, type: Discord.ChannelType.GuildText});
             }
         }
 
@@ -204,7 +204,7 @@ export default class Admin {
 
         const user = await this.bot.users.fetch(id);
         if (user) {
-            const guildmember = this.adminChannel!.guild.member(user);
+            const guildmember = this.adminChannel!.guild.members.cache.get(id);
             if (guildmember) {
                 await guildmember.roles.add(this.muteRole);
             }

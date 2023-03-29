@@ -119,14 +119,6 @@ export interface SharedSettings {
         maxListeners: number,
     };
 
-    officehours: {
-        allowedRoles: string[],
-        openMessage: string,
-        closeMessage: string,
-        addedMessage: string,
-        removedMessage: string,
-    };
-
     riotApiLibraries: {
         noLanguage: string,
         languageList: string,

@@ -25,7 +25,7 @@ export default class SpamKiller {
         this.bot = bot;
 
         bot.on("messageReactionAdd", this.onReaction.bind(this));
-        bot.on("message", this.onMessage.bind(this));
+        bot.on("messageCreate", this.onMessage.bind(this));
         bot.on("ready", this.onReady.bind(this));
     }
 
