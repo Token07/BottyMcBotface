@@ -46,7 +46,7 @@ function generateProxy<T>(obj: T, location: string, backupLocation: string | nul
     const proxy = {
         set(object: any, property: string, value: any, receiver: any) {
             Reflect.set(object, property, value, receiver);
-            const data = JSON.stringify(obj, null, 4);
+            const data = JSON.stringify(obj);
             fs.writeFileSync(location, data);
             if (backupLocation)
                 fs.writeFileSync(backupLocation, data);
