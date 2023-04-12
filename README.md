@@ -1,7 +1,5 @@
 # BottyMcBotface
 
-[![Build Status](https://travis-ci.org/Querijn/BottyMcBotface.svg?branch=master)](https://travis-ci.org/Querijn/BottyMcBotface)
-
 The Riot Games API Discord Bot. This is the bot that helps out with your questions regarding the Riot Games API. 
 
 ## Available commands
@@ -36,9 +34,7 @@ The Riot Games API Discord Bot. This is the bot that helps out with your questio
 - **ApiUrlInterpreter**: Scans for API Urls and tries identifying issues. Otherwise, posts what the result of that API call would be.
 - **VersionChecker**: Checks out if League of Legends or DDragon has updated to a new version. If so, posts in #external-activity.
 - **Info**: Saves all kinds of notes and outputs them on request. This is the !note command.
-- **OfficeHours**: Manages Office Hours states, updates availability of Office Hours with a notification to those requested it, and manages questions asked by users outside of Office Hours.
 - **AutoReact**: A small module that reacts to specific messages made by users.
-- **Uptime**: A module that keeps track of uptime.
 - **ApiStatus**: Keeps track of the API status.
 - **RiotAPILibraries**: Can output the Riot API Libraries from the article on the forum via GitHub.
 - **Esports**: Handles the data collection and output for !esports 
