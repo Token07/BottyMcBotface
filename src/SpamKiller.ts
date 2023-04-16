@@ -210,6 +210,7 @@ export default class SpamKiller {
 
     async onReaction(messageReaction: Discord.MessageReaction, user: Discord.User) {
         if (user.bot) return;
+        if (messageReaction.emoji.name != "👍") return;
 
         // Find the deleted entry
         const deletedEntry = this.violators.find(v => v.response?.id === messageReaction.message.id);
