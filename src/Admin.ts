@@ -255,7 +255,9 @@ export default class Admin {
                     note = `The user did not receive their ${words[0]} message. `
                 });
             }
-            message.channel.messages.cache.filter(mc => mc.author.id === member.id).last()?.react("🛫")
+            if (message.guild) {
+                message.channel.messages.cache.filter(mc => mc.author.id === member.id).last()?.react("🛫")
+            }
             if (action === "ban") {
                 await member.ban({ reason: (reason.length > 0 ? this.shorten(reason) : "No reason") + " -" + message.author.username })
                     .then(() => { this.logSuccessMessage(message, member, note, reason, words); removed++ })
