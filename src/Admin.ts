@@ -255,10 +255,10 @@ export default class Admin {
                     note = `The user did not receive their ${words[0]} message. `
                 });
             }
-            if (message.guild) {
-                message.channel.messages.cache.filter(mc => mc.author.id === member.id).last()?.react("🛫")
-            }
             if (action === "ban") {
+                if (message.guild) {
+                    message.channel.messages.cache.filter(mc => mc.author.id === member.id).last()?.react("🛫")
+                }
                 await member.ban({ reason: (reason.length > 0 ? this.shorten(reason) : "No reason") + " -" + message.author.username })
                     .then(() => { this.logSuccessMessage(message, member, note, reason, words); removed++ })
                     .catch((e) => this.replySecretMessage(message, `Failed to ${words[0]} ${member}: ${e}`));
