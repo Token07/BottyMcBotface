@@ -7,6 +7,7 @@ export interface PersonalSettings {
     };
 
     discord: {
+        clientId: string,
         key: string,
         owner: number;
     };
