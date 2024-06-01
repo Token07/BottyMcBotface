@@ -64,11 +64,6 @@
             "429367396420157460"
         ]
     },
-    "esports": {
-        "printChannel": "lol-esports",
-        "updateTimeout": 18000000,
-        "printToChannelTimeout": 43200000
-    },
     "techBlog": {
         "checkInterval": 300000,
         "channel": "tech-articles",
@@ -214,17 +209,6 @@
                 "league-status"
             ]
         }
-    },
-    "pickem": {
-        "leaderboardUrl": "https://pickem.lolesports.com/api/get_vs_list_rankings/{listId}",
-        "groupPickUrl": "https://pickem.lolesports.com/api/get_group_picks/series/{series}/user/{user}",
-        "bracketsUrl": "https://pickem.lolesports.com/api/get_bracket_picks/series/{series}/user/{user}",
-        "pointsUrl": "https://pickem.lolesports.com/api/get_points/series/{series}?user=",
-        "worldsId": 7,
-        "blankId": 1743991,
-        "listId": [918098],
-        "updateTimeout": 3600000,
-        "printMode": "BRACKET"
     },
     "spam": {
         "allowedUrls": [

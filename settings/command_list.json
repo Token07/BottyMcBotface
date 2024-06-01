@@ -72,23 +72,6 @@
             "description": "List previous offenses of a user or add a new one."
         }
     },
-    "esports": {
-        "date": {
-            "aliases": [
-                "esports"
-            ],
-            "description": "Print out esport games on that date"
-        },
-        "pickem": {
-            "aliases": [
-                "pickem",
-                "pick_em",
-                "pick_ems",
-                "pickems"
-            ],
-            "description": "Print out your pickems"
-        }
-    },
     "controller": {
         "toggle": {
             "admin": true,

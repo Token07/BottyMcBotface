@@ -10,7 +10,6 @@ import Logger from "./Logger";
 import RiotAPILibraries from "./RiotAPILibraries";
 import Techblog from "./Techblog";
 import VersionChecker from "./VersionChecker";
-import ESportsAPI from "./ESports";
 import Endpoint from "./Endpoint";
 import PageDiffer from "./PageDiffer";
 import { APISchema } from "./ApiSchema";
@@ -41,7 +40,6 @@ const admin = new Admin(bot.client, sharedSettings, "data/admin_data.json", note
 const react = new AutoReact(bot.client, interactionManager, sharedSettings, "data/thinking_data.json", "data/ignored_react_data.json");
 const status = new ApiStatus(sharedSettings);
 const libraries = new RiotAPILibraries(sharedSettings);
-const esports = new ESportsAPI(bot.client, sharedSettings, interactionManager);
 const endpoint = new Endpoint(sharedSettings, "data/endpoints.json");
 const pageDiffer = new PageDiffer(bot.client, sharedSettings, "data/page_differ.json");
 const spamKiller = new SpamKiller(bot.client, sharedSettings);
@@ -63,9 +61,6 @@ controller.registerCommand(commandList.admin.mute, admin.onMute.bind(admin));
 controller.registerCommand(commandList.admin.ticket, admin.onTicket.bind(admin));
 controller.registerCommand(commandList.admin.kick, admin.onKick.bind(admin));
 controller.registerCommand(commandList.admin.ban, admin.onBan.bind(admin));
-
-// Esport commands
-controller.registerCommand(commandList.esports.date, esports.onCheckNext.bind(esports));
 
 // API schema commands
 controller.registerCommand(commandList.apiSchema.updateSchema, apiSchema.onUpdateSchemaRequest.bind(apiSchema));

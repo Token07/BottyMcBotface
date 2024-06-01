@@ -43,10 +43,6 @@ export interface CommandList {
         ban: Command;
         kick: Command;
     };
-    esports: {
-        date: Command;
-        pickem: Command;
-    };
     games: {
         ttt: Command;
     };
