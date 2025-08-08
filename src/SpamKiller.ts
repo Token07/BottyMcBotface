@@ -13,6 +13,13 @@ class Violator {
     public violations = 0;
 }
 
+interface SpamKillerResult {
+    filter: string,
+    message: Discord.Message,
+    result: boolean,
+    actionTaken?: boolean
+}
+
 export default class SpamKiller {
     private bot: Discord.Client;
     private guild: Discord.Guild;
@@ -29,6 +36,8 @@ export default class SpamKiller {
     private violators: Violator[] = [];
     private sharedSettings: SharedSettings;
     private tldList: string[];
+
+    private filterResultCache: SpamKillerResult[] = [];
 
     private caughtSpammingLinks: Set<string> = new Set();
     private guruLogChannel: Discord.GuildBasedChannel | undefined;
@@ -85,15 +94,57 @@ export default class SpamKiller {
             return;
 
         // Functions return true if they delete the message. This makes sure that a message only gets deleted once
-        this.checkInviteLinkSpam(message) ||
-        this.checkForLinks(message) || 
-        this.checkForGunbuddy(message) || 
-        this.checkForPlayerSupport(message) || 
-        this.checkForCryptoWords(message) || 
-        this.checkForDupes(message) || 
-        this.checkForFlood(message) ||
-        this.checkForMisleadingLinks(message) ||
-        this.checkForTelegramSpam(message);
+        const filters = [
+            this.checkInviteLinkSpam,
+            this.checkForLinks,
+            this.checkForGunbuddy,
+            this.checkForPlayerSupport,
+            this.checkForCryptoWords,
+            this.checkForDupes,
+            this.checkForFlood,
+            this.checkForMisleadingLinks,
+            this.checkForTelegramSpam
+        ];
+
+        for (const filter of filters) {
+            const result = filter.bind(this)(message);
+            if (this.filterResultCache.length > 100) {
+                this.filterResultCache.shift()
+            }
+            this.filterResultCache.push({
+                filter: filter.name,
+                result: result === true ? true : false,
+                message: message
+            })
+            if (result == true) {
+                continue;
+            }
+        }
+
+        // Check for multiple violations across multiple channels in 15 seconds
+        // TODO: Move violation count, channel count and duration to sharedSettings
+        const time = Date.now();
+        const userViolations = this.filterResultCache.filter(f => f.message.author.id === message.author.id && f.result === true && (time - f.message.createdTimestamp) < 15000);
+        const uniqueChannels = new Set(userViolations.map(f => f.message.channel.id));
+        if (userViolations.length >= 3 && uniqueChannels.size >= 3) {
+            if (!message.member) { return; }
+            try {
+                await message.channel.send(`Hey, <@${message.author.id}>: Chill, you triggered our spam detector too many times`);
+                await message.member.timeout(5 * 60 * 1000);
+                try {
+                    await message.delete();
+                }
+                catch {
+                    // May fail because a filter deletes it first.
+                }
+            }
+            catch (e) {
+                console.warn(e.stack);
+            }
+            finally {
+                console.log(`SpamKiller: <@${message.author.id}> triggered the multiple violations across multiple channels rule.\nFilters triggered: ` + userViolations.map(v => v.filter).join(","));
+            }
+        }
 
         if (!message.member) return; // This shouldn't happen but...
         const memberMessageHistory = this.messageHistory.get(message.member?.id) || [];
