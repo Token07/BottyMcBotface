@@ -1,0 +1,56 @@
+name: Auto Deploy
+
+on:
+  push:
+    branches:
+      - prod
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: 'npm'
+
+      - name: Install Packages
+        run: npm install
+
+      - name: Build Botty
+        run: npm run compile
+
+      - name: Connect via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_KEY }}
+          script: |
+            set -e
+
+            cd /home/botty/botty
+
+            echo "📦 Backing up /data and /private..."
+            timestamp=$(date +%Y%m%d_%H%M%S)
+            mkdir -p /home/botty/backups
+
+            for dir in data private; do
+              if [ -d "$dir" ]; then
+                echo "  → Backing up $dir to /home/botty/backups/${dir}_${timestamp}.tar.gz"
+                tar -czf "/home/botty/backups/${dir}_${timestamp}.tar.gz" "$dir"
+              fi
+            done
+
+            echo "🔄 Pulling latest changes..."
+            git -c merge.ours.driver=true pull --strategy-option=ours
+
+            echo "🚀 Restarting user service..."
+            systemctl --user restart botty.service
+
+            echo "✅ Deployment complete at $(date)"
