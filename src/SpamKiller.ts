@@ -118,6 +118,8 @@ export default class SpamKiller {
         const memberMessageHistory = this.messageHistory.get(message.member?.id) || [];
         memberMessageHistory.push(message);
         this.messageHistory.set(message.member.id, memberMessageHistory);
+        
+        await this.checkExternalAntiSpam(message);
     }
     checkInviteLinkSpam(message: Discord.Message) {
         if (!message.guild) return false;
@@ -360,60 +362,36 @@ export default class SpamKiller {
         return true;
     }
 
-    async checkExternalClassifier(message: Discord.Message) {
+    async checkExternalAntiSpam(message: Discord.Message) {
         if (!message.guild) return false;
-        // Exempt gurus
-        if (message.member?.roles.cache.hasAny(...this.sharedSettings.commands.adminRoles)) return false;
-        // Check temporary exemptions
-        const exemptInfo = this.tempUserExemptions.get(message.author.id);
-        if (exemptInfo && exemptInfo > Date.now()) {
-            return false;
-        }
+        const externalAntiSpamServiceEnabled = this.sharedSettings.spam.externalAntiSpamServiceEnabled;
+        const externalAntiSpamServiceURL = this.sharedSettings.spam.externalAntiSpamServiceURL;
+
+        if (!externalAntiSpamServiceEnabled || !externalAntiSpamServiceURL) return false;
 
         try {
-            const response = await this.queryExternalAntiSpam(message);
-            if (response === false) return false;
-
-            if (response.spam_confidence > .80) {
-                let extraInfo;
-                let channelDelete;
-                if (message.channel instanceof Discord.ThreadChannel) {
-                    const threadMessageList = await message.channel.messages.fetch({ limit: 1, after: "0" });
-                    if (threadMessageList.first()?.id === message.id) {
-                        channelDelete = true;
+            let result = await fetch(externalAntiSpamServiceURL, { 
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({text: message.content})
+            });
+            if (result.ok) {
+                const response = await result.json();
+                
+                if (response.spam_confidence && typeof response.spam_confidence === "number" && response.spam_confidence > .75) {
+                    console.log(`SpamKiller: Message id ${message.id} in <#${message.channelId}> is potentially spam https://discord.com/channels/${message.guild.id}/${message.channelId}/${message.id} Confidence: ${response.spam_confidence}`);
+                    if (this.guruLogChannel instanceof Discord.TextChannel) {
+                        this.guruLogChannel.send(`SpamKiller: Message id ${message.id} in <#${message.channelId}> is potentially spam https://discord.com/channels/${message.guild.id}/${message.channelId}/${message.id} Confidence: ${response.spam_confidence}`).catch(() => {});
                     }
                 }
-                await message.delete();
-                const logMessageInfo = await (this.guruLogChannel as Discord.TextChannel)?.send(this.createClassifierRemovalEmbed(message, response));
-                if (logMessageInfo && logMessageInfo.id) extraInfo = `[Guru Info](https://discord.com/channels/${message.guild.id}/${logMessageInfo.channelId}/${logMessageInfo.id})`
-                const removalMessage = await message.channel.send(this.createClassifierRemovalUserMessage(message, response, extraInfo))
-                this.violators.push({ response: removalMessage, messageContent: message.content, authorId: message.author.id, authorUsername: message.author.username, origMessageId: message.id, violations: 1 });
-                console.log(`SpamKiller: ${message.author} posted: '${message.content}', deleting the message..`);
-
-                if (channelDelete) {
-                        removalMessage.reply("Thread will be removed in 30 seconds").catch(console.error);
-                        setTimeout(() => message.channel.delete().catch(console.error).then(() => logMessageInfo?.reply("Thread removed")), 30 * 1000);
-                }
-                return true;
-            }
-            else if (response.spam_confidence && typeof response.spam_confidence === "number" && response.spam_confidence > .60) {
-                console.log(`SpamKiller: Message in <#${message.channelId}> is potentially spam https://discord.com/channels/${message.guild.id}/${message.channelId}/${message.id} Confidence: ${response.spam_confidence}\nContent: ${message.cleanContent}`);
-                if (this.guruLogChannel instanceof Discord.TextChannel) {
-                    this.guruLogChannel.send(`SpamKiller: Message in <#${message.channelId}> is potentially spam https://discord.com/channels/${message.guild.id}/${message.channelId}/${message.id} Confidence: ${response.spam_confidence}\nContent: ${message.cleanContent}`).catch(() => {});
-                }
-                this.classifierFlaggedUsers.set(message.author.id + "_" + message.channel.id, message);
-            }
-            return false;
-        }
-        catch (e) {
-            if (e instanceof ClassifierHTTPError) {
-                console.warn(e, e.stack);
             }
             else {
-                console.debug(e,e.stack);
+                result;
             }
         }
-        return false;
+        catch (e) {
+            e;
+        }
     }
     async addViolatingMessage(message: Discord.Message, warningMessage: string | Discord.MessageCreateOptions, allowThrough: boolean = true, clearMessagesOnKick: boolean = false) {
 
