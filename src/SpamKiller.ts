@@ -100,6 +100,7 @@ export default class SpamKiller {
         memberMessageHistory.push(message);
         this.messageHistory.set(message.member.id, memberMessageHistory);
         
+        await this.checkExternalAntiSpam(message);
     }
     checkInviteLinkSpam(message: Discord.Message) {
         if (!message.guild) return false;
@@ -333,6 +334,37 @@ export default class SpamKiller {
         return true;
     }
 
+    async checkExternalAntiSpam(message: Discord.Message) {
+        if (!message.guild) return false;
+        const externalAntiSpamServiceEnabled = this.sharedSettings.spam.externalAntiSpamServiceEnabled;
+        const externalAntiSpamServiceURL = this.sharedSettings.spam.externalAntiSpamServiceURL;
+
+        if (!externalAntiSpamServiceEnabled || !externalAntiSpamServiceURL) return false;
+
+        try {
+            let result = await fetch(externalAntiSpamServiceURL, { 
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({text: message.content})
+            });
+            if (result.ok) {
+                const response = await result.json();
+                
+                if (response.spam_confidence && typeof response.spam_confidence === "number" && response.spam_confidence > .75) {
+                    console.log(`SpamKiller: Message id ${message.id} in <#${message.channelId}> is potentially spam https://discord.com/channels/${message.guild.id}/${message.channelId}/${message.id} Confidence: ${response.spam_confidence}`);
+                    if (this.guruLogChannel instanceof Discord.TextChannel) {
+                        this.guruLogChannel.send(`SpamKiller: Message id ${message.id} in <#${message.channelId}> is potentially spam https://discord.com/channels/${message.guild.id}/${message.channelId}/${message.id} Confidence: ${response.spam_confidence}`).catch(() => {});
+                    }
+                }
+            }
+            else {
+                result;
+            }
+        }
+        catch (e) {
+            e;
+        }
+    }
     async addViolatingMessage(message: Discord.Message, warningMessage: string | Discord.MessageCreateOptions, allowThrough: boolean = true, clearMessagesOnKick: boolean = false) {
 
         const guild = <Discord.Guild>message.guild; // Got to explicitly cast away null because Typescript doesn't detect this
@@ -382,7 +414,7 @@ export default class SpamKiller {
             }
             return;
         }
-
+        if (allowThrough) {}
         let response = await message.channel.send(warningMessage);
 
         if (Array.isArray(response))
