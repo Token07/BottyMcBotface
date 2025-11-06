@@ -2,7 +2,7 @@ name: Auto Deploy
 
 on:
   workflow_run:
-    workflows: ["Compile Check"]
+    workflows: ["Compile check"]
     types:
       - completed
 
