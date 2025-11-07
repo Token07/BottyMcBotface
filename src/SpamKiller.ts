@@ -379,9 +379,9 @@ export default class SpamKiller {
                 const response = await result.json();
                 
                 if (response.spam_confidence && typeof response.spam_confidence === "number" && response.spam_confidence > .75) {
-                    console.log(`SpamKiller: Message id ${message.id} in <#${message.channelId}> is potentially spam https://discord.com/channels/${message.guild.id}/${message.channelId}/${message.id} Confidence: ${response.spam_confidence}`);
+                    console.log(`SpamKiller: Message in <#${message.channelId}> is potentially spam https://discord.com/channels/${message.guild.id}/${message.channelId}/${message.id} Confidence: ${response.spam_confidence}\nContent: ${message.cleanContent}`);
                     if (this.guruLogChannel instanceof Discord.TextChannel) {
-                        this.guruLogChannel.send(`SpamKiller: Message id ${message.id} in <#${message.channelId}> is potentially spam https://discord.com/channels/${message.guild.id}/${message.channelId}/${message.id} Confidence: ${response.spam_confidence}`).catch(() => {});
+                        this.guruLogChannel.send(`SpamKiller: Message in <#${message.channelId}> is potentially spam https://discord.com/channels/${message.guild.id}/${message.channelId}/${message.id} Confidence: ${response.spam_confidence}\nContent: ${message.cleanContent}`).catch(() => {});
                     }
                 }
             }
