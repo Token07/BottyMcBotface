@@ -389,7 +389,6 @@ export default class SpamKiller {
                 if (response.spam_confidence > .80) {
                     let extraInfo;
                     await message.delete();
-                    this.guruLogChannel = message.guild.channels.cache.find(k => k.id == "1087182286274961438");
                     const logMessageInfo = await (this.guruLogChannel as Discord.TextChannel)?.send(this.createClassifierRemovalEmbed(message));
                     if (logMessageInfo && logMessageInfo.id) extraInfo = `[Guru Info](https://discord.com/channels/${message.guild.id}/${logMessageInfo.channelId}/${logMessageInfo.id})`
                     const removalMessage = await message.channel.send(this.createClassifierRemovalUserMessage(message, response, extraInfo))
