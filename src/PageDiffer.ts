@@ -2,11 +2,11 @@ import { fileBackedObject } from "./FileBackedObject";
 import { SharedSettings, PageType, PageDifferPage } from "./SharedSettings";
 import { clearTimeout, setTimeout } from "timers";
 
-import Discord = require("discord.js");
-import crc32 = require("crc-32");
-import fs = require("fs");
+import * as Discord from "discord.js";
+import * as crc32 from "crc-32";
+import * as fs from "fs";
 import fetch, { FetchError } from "node-fetch";
-import h2p = require("html2plaintext");
+import h2p from "html2plaintext";
 
 interface PageDifferData {
     hashes: { [page: string]: number };
@@ -23,7 +23,7 @@ export default class PageDiffer {
     private channel: Discord.TextChannel;
     private sharedSettings: SharedSettings;
     private data: PageDifferData;
-    private timeOut: NodeJS.Timer | null;
+    private timeOut: NodeJS.Timeout | null;
 
     constructor(bot: Discord.Client, sharedSettings: SharedSettings, pageDiffFile: string) {
         console.log("Requested PageDiffer extension..");

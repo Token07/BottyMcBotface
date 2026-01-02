@@ -1,4 +1,4 @@
-import Discord = require("discord.js");
+import * as Discord from "discord.js";
 import fetch from "node-fetch";
 import { fileBackedObject } from "./FileBackedObject";
 import { PersonalSettings, SharedSettings } from "./SharedSettings";
@@ -22,7 +22,7 @@ export default class Endpoint {
     private baseUrl: string;
     private maxDistance: number;
     private aliases: { [key: string]: string[] };
-    private timeOut: NodeJS.Timer | null;
+    private timeOut: NodeJS.Timeout | null;
     private timeOutDuration: number;
 
     public constructor(sharedSettings: SharedSettings, endpointFile: string) {

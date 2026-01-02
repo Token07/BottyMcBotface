@@ -1,9 +1,9 @@
 import fetch from "node-fetch";
-import Discord = require("discord.js");
+import * as Discord from "discord.js";
 import { SharedSettings } from "./SharedSettings";
 import { clearTimeout, setTimeout } from "timers";
 import * as CheerioAPI from "cheerio";
-import * as momentjs from "moment";
+import momentjs from "moment";
 import InteractionManager from "./InteractionManager";
 
 interface ESportsAPIReturnData {
@@ -67,8 +67,8 @@ export default class ESportsAPI {
     private esportsChannel: Discord.GuildBasedChannel | null = null;
 
     private schedule: Map<string, Map<string, ESportsLeagueSchedule[]>> = new Map();
-    private postInfoTimeOut: NodeJS.Timer | null;
-    private loadDataTimeOut: NodeJS.Timer | null;
+    private postInfoTimeOut: NodeJS.Timeout | null;
+    private loadDataTimeOut: NodeJS.Timeout | null;
 
     constructor(bot: Discord.Client, settings: SharedSettings, interactionManager?: InteractionManager) {
         this.bot = bot;

@@ -1,6 +1,6 @@
 import { SharedSettings } from "./SharedSettings";
 
-import Discord = require("discord.js");
+import * as Discord from "discord.js";
 import fetch from "node-fetch";
 
 import { clearTimeout, setTimeout } from "timers";
@@ -57,7 +57,7 @@ export default class RiotAPILibraries {
 
     private fetchSettings: object;
     private languageList: string[] = [];
-    private timeOut: NodeJS.Timer | null;
+    private timeOut: NodeJS.Timeout | null;
 
     constructor(settings: SharedSettings) {
         const personalSettings = settings.botty;

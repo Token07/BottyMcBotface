@@ -122,7 +122,7 @@ export class APISchema {
     public platforms: string[];
 
     private sharedSettings: SharedSettings;
-    private timeOut: NodeJS.Timer | null;
+    private timeOut: NodeJS.Timeout | null;
 
     constructor(sharedSettings: SharedSettings) {
         this.sharedSettings = sharedSettings;

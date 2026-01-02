@@ -1,7 +1,7 @@
-import Discord = require("discord.js");
-import prettyMs = require("pretty-ms");
+import * as Discord from "discord.js";
+import * as prettyMs from "pretty-ms";
 import { SharedSettings } from "./SharedSettings";
-import url = require("url");
+import * as url from "url";
 import { levenshteinDistance } from "./LevenshteinDistance";
 import fetch from "node-fetch";
 
