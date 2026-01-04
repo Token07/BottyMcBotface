@@ -19,6 +19,20 @@ interface ClassifierResponse {
     mtime: number
 }
 
+interface SpamKillerRule {
+    function: (message: Discord.Message) => boolean | SpamKillerResult | Promise<false | undefined>,
+    action: "LOG" | "WARNCUSTOM" | "WARN" | "HOLD" | "KICK" | "MESSAGE_CLEANUP",
+    result?: any
+}
+
+interface SpamKillerResult {
+    result: boolean,
+    auditLogReason?: string
+    adminMessage?: string | Discord.MessageCreateOptions,
+    userMessage?: string | Discord.MessageCreateOptions,
+    overrideDefaultAction?: SpamKillerRule["action"]
+}
+
 class ClassifierHTTPError extends Error {}
 
 export default class SpamKiller {
@@ -74,7 +88,7 @@ export default class SpamKiller {
         }
         this.role = role;
         this.floodCheckTimer = setTimeout(this.messageHistoryCleanup.bind(this));
-        try { 
+        try {
             let tldListReq = await fetch("https://data.iana.org/TLD/tlds-alpha-by-domain.txt");
             let tldListResp = await tldListReq.text();
 
@@ -95,20 +109,68 @@ export default class SpamKiller {
             return;
 
         // Functions return true if they delete the message. This makes sure that a message only gets deleted once
-        this.checkInviteLinkSpam(message) ||
-        this.checkForLinks(message) || 
-        this.checkForGunbuddy(message) || 
-        this.checkForPlayerSupport(message) || 
-        await this.checkExternalClassifier(message) ||
-        this.checkForCryptoWords(message) || 
-        this.checkForDupes(message) || 
-        this.checkForFlood(message) ||
-        this.checkForMisleadingLinks(message);
+        const rules: SpamKillerRule[] = [
+            /*
+                KICK = Remove from server
+                WARNCUSTOM = deletion followed with warning that doesn't go through addViolatingMessage
+                WARN = traditional addViolatingMessage but don't allow reactions
+                HOLD = traditional addViolatingMessage
+                MESSAGE_CLEANUP = clear user's recent messages
+                LOG  = nothing
 
+                Actions are processed in above order
+            */
+            { function: this.checkInviteLinkSpam, action: "KICK" },
+            { function: this.checkForLinks, action: "HOLD"},
+            { function: this.checkForGunbuddy, action: "WARN" },
+            { function: this.checkForPlayerSupport, action: "WARN", },
+            { function: this.checkExternalClassifier, action: "WARNCUSTOM" },
+            { function: this.checkForCryptoWords, action: "HOLD" },
+            { function: this.checkForDupes, action: "MESSAGE_CLEANUP" },
+            { function: this.checkForFlood, action: "MESSAGE_CLEANUP" },
+            { function: this.checkForMisleadingLinks, action: "LOG" }
+        ];
+        for (const rule of rules) {
+            const r = await rule.function.bind(this)(message);
+            rule.result = r;
+            if (typeof r === "object" && r.overrideDefaultAction) {
+                rule.action = r.overrideDefaultAction as SpamKillerRule["action"];
+            }
+        }
         if (!message.member) return; // This shouldn't happen but...
         const memberMessageHistory = this.messageHistory.get(message.member?.id) || [];
         memberMessageHistory.push(message);
         this.messageHistory.set(message.member.id, memberMessageHistory);
+
+        const triggeredRules = rules.filter(r => r.result === true || (typeof r === "object" && typeof r.result === "object" && r.result.result === true));
+        if (triggeredRules.length === 0) {
+            return;
+        }
+        console.log(`Spamkiller: ${message.author.username} (${message.author.id}) triggered rules: ${triggeredRules.join(",")}`)
+        // Exempt admins from all rules
+        if (message.member?.roles.cache.hasAny(...this.sharedSettings.commands.adminRoles)) {
+                return;
+        }
+        const kickRules = triggeredRules.filter(r => r.action === "KICK");
+        if (kickRules.length > 0) {
+            this.kickAction(message, kickRules[0]);
+            return;
+        }
+        const warnCustomRules = triggeredRules.filter(r => r.action === "WARNCUSTOM");
+        if (warnCustomRules.length > 0) {
+            this.warnCustomAction(message, warnCustomRules[0]);
+            return;
+        }
+        const warnRules = triggeredRules.filter(r => r.action === "WARN");
+        if (warnRules.length > 0) {
+            this.warnAction(message, warnRules[0]);
+            return;
+        }
+        const holdRules = triggeredRules.filter(r => r.action === "HOLD");
+        if (holdRules.length > 0) {
+            this.holdAction(message, holdRules[0]);
+            return;
+        }
     }
     checkInviteLinkSpam(message: Discord.Message) {
         if (!message.guild) return false;
@@ -122,17 +184,10 @@ export default class SpamKiller {
                     const guildNameLower = inviteInfo.guild.name.toLowerCase().split(" ");
                     const hasBad = bad.some(word => guildNameLower.includes(word));
                     if (!hasBad) return false;
-                    message.delete().catch(console.error);
-                    if (message.member?.kickable) {
-                        message.member.kick("Spamming NSFW invite links");
-                        console.log(`SpamKiller: Removing <@${message.author.id}> from the server for spamming NSFW invite links`);
-                        if (this.guruLogChannel instanceof Discord.TextChannel) {
-                            this.guruLogChannel.send(`SpamKiller: Removing <@${message.author.id}> from the server for spamming NSFW invite links`);
-                        }
-                    }
-                    else {
-                        console.log(`SpamKiller: <@${message.author.id}> appears to be spamming NSFW links but isn't kickable`);
-                    }
+                    return {
+                        result: true,
+                        auditLogReason: "Spamming NSFW invite links"
+                    } as SpamKillerResult;
                 }).catch(() => {});
             }
         }
@@ -191,9 +246,14 @@ export default class SpamKiller {
             .setThumbnail("https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Antu_dialog-warning.svg/240px-Antu_dialog-warning.svg.png")
             .setDescription("We require users to verify that they are human before they are allowed to send messages that include certain keywords. If you are a human, react with :+1: to this message. If you are a bot, please go spam somewhere else. 👍");
 
-        this.addViolatingMessage(message, {content: `Hey, ${message.author} If you are a human, react with :+1: to this message`, embeds: [embed] });
-        return true;
-    }    
+        return {
+            result: true,
+            userMessage: {
+                content: "We require users to verify that they are human before they are allowed to send messages that include certain keywords. If you are a human, react with :+1: to this message. If you are a bot, please go spam somewhere else. 👍",
+                embeds: [embed]
+            } as Discord.MessageCreateOptions
+        } as SpamKillerResult
+    }
 
     checkForPlayerSupport(message: Discord.Message) {
         const wordList1 = ['ban', 'banned', 'hacked', 'stolen', 'suspended'];
@@ -224,9 +284,13 @@ export default class SpamKiller {
                     {name: "LoR", value: "[Discord](https://discord.gg/LegendsOfRuneterra)\n[Subreddit](https://reddit.com/r/LegendsofRuneterra)", inline: true},
                     {name: "\u200b", value: "\u200b", inline: true}
                 ]);
-            this.addViolatingMessage(message, {content: `Hey ${message.author}, There is no game or account support here`, embeds: [violationEmbed]}, false);
-
-            return true;
+            return {
+                result: true,
+                userMessage: {
+                    content: `Hey ${message.author}, There is no game or account support here`,
+                    embeds: [violationEmbed]
+                } as Discord.MessageCreateOptions
+            } as SpamKillerResult
         }
 
         return false;
@@ -280,9 +344,14 @@ export default class SpamKiller {
                 .setColor(0xff0000)
                 .setThumbnail("https://upload.wikimedia.org/wikipedia/commons/1/19/Stop2.png")
                 .setDescription(`You triggered our spam detector. this is not a Riot Games server. There are no Rioters here, and no one can give you a gunbuddy. See <#914594958202241045> for more information`)
-            this.addViolatingMessage(message, {content: `Hey ${message.author}, there are no gun buddies here`, embeds: [violationEmbed]}, false);
 
-            return true;
+            return {
+                result: true,
+                userMessage: {
+                    content: `Hey ${message.author}, there are no gun buddies here`,
+                    embeds: [violationEmbed]
+                } as Discord.MessageCreateOptions
+            } as SpamKillerResult
         }
 
         return false;
@@ -308,6 +377,7 @@ export default class SpamKiller {
             return false;
 
         if (this.sharedSettings.spam.blockedUrls.findIndex((blockedUrl => hostname == blockedUrl)) !== -1) {
+            let overrideDefaultAction;
             // Exempt admins
             if (this.sharedSettings.commands.adminRoles.some(x => message.member && message.member.roles.cache.has(x))) return false;
 
@@ -315,9 +385,11 @@ export default class SpamKiller {
             // Not using addViolatingMessage because affecting people with ok roles is intentional
             const reportChannel = this.bot.guilds.cache.find(gc => gc.id == this.sharedSettings.server.guildId)?.channels.cache.find(cc => cc.name == this.sharedSettings.server.guruLogChannel && cc.type == Discord.ChannelType.GuildText);
             if (reportChannel) (reportChannel as Discord.TextChannel).send(`SpamKiller: ${message.author.username} (${message.author.id}) posted blocked url ${urlString}`);
-            if (message.content.indexOf("(HOW)") !== -1) { message.member?.kickable ? message.member?.kick("Crypto spam").then(() => { message.channel.send("🛫") }) : ""}
-            message.delete();
-            return true;
+            if (message.content.indexOf("(HOW)") !== -1) { overrideDefaultAction = "KICK" }
+            else { overrideDefaultAction = "WARNCUSTOM" };
+            return {
+                result: true,
+            } as SpamKillerResult
         }
 
         // Attempt to stop Mr Beast spam images
@@ -328,8 +400,15 @@ export default class SpamKiller {
                 .setColor(0xffcc00)
                 .setThumbnail("https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Antu_dialog-warning.svg/240px-Antu_dialog-warning.svg.png")
                 .setDescription("Your message matches a known spam pattern and was disallowed.");
-            this.addViolatingMessage(message, {content: `Hey, ${message.author} Your message matches a known spam pattern and was disallowed.`, embeds: [embed] }, false);
-            return true;
+
+            return {
+                result: true,
+                userMessage: {
+                    content: `Hey, ${message.author} Your message matches a known spam pattern and was disallowed.`,
+                    embeds: [embed]
+                } as Discord.MessageCreateOptions,
+                overrideDefaultAction: "WARNCUSTOM"
+            } as SpamKillerResult
         }
 
         const embed = new Discord.EmbedBuilder()
@@ -575,6 +654,41 @@ export default class SpamKiller {
                 .addFields({ name: "\xa0", value: extraInfo || "" })
                 .setFooter({ text: "v:" + response.mtime + " | Message scored " + response.spam_confidence.toPrecision(5) + ` | Message ID: ${ message.id }`})
             ]
+        }
+    }
+    private async holdAction(message: Discord.Message, resultEntry: SpamKillerRule) {
+        try {
+            this.addViolatingMessage(message, resultEntry.result.userMessage, true);
+        }
+        catch (e) {
+            console.warn("Spamkiller: Call to addViolatingMessage failed on message id " + message.id, e.stack);
+        }
+    }
+    private async kickAction(message: Discord.Message, resultEntry: SpamKillerRule) {
+        try {
+            message.delete().catch(() => null);
+            message.member!.kick(resultEntry.result.auditLogReason);
+        }
+        catch (e) {
+            console.warn(`Spamkiller: Failed to kick ${message.author.username} for ${resultEntry.result.adminMessage}`, e.stack);
+        }
+    }
+    private async warnAction(message: Discord.Message, resultEntry: SpamKillerRule) {
+        try {
+            this.addViolatingMessage(message, resultEntry.result.userMessage, false);
+        }
+        catch (e) {
+            console.warn("Spamkiller: Failed to delete message id " + message.id, e.stack);
+        }
+    }
+    private async warnCustomAction(message: Discord.Message, resultEntry: SpamKillerRule) {
+        try {
+            await message.delete();
+            if (!resultEntry.result.userMessage) return;
+            await message.channel.send(resultEntry.result.userMessage);
+        }
+        catch (e) {
+            console.warn("Spamkiller: Failed to delete message id " + message.id, e.stack);
         }
     }
 }
