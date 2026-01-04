@@ -1,5 +1,4 @@
 import Discord = require("discord.js");
-import prettyMs = require("pretty-ms");
 import { SharedSettings } from "./SharedSettings";
 import url = require("url");
 import { levenshteinDistance } from "./LevenshteinDistance";
@@ -52,7 +51,6 @@ export default class SpamKiller {
     private sharedSettings: SharedSettings;
     private tldList: string[];
 
-    private caughtSpammingLinks: Set<string> = new Set();
     private guruLogChannel: Discord.GuildBasedChannel | undefined;
     private tempUserExemptions = new Map<string, number>();
 
@@ -199,7 +197,6 @@ export default class SpamKiller {
     }
     checkForMisleadingLinks(message: Discord.Message) {
         const reportChannel = this.bot.guilds.cache.find(gc => gc.id == this.sharedSettings.server.guildId)?.channels.cache.find(cc => cc.name == this.sharedSettings.server.guruLogChannel && cc.type == Discord.ChannelType.GuildText);
-        //let links = message.content.match(/(\[(https?:\/\/.*?)\]\((https:\/\/.*?)\)/g);
         let links = message.content.match(/(\[.*?\])(\(<?https:\/\/.*?\)\>?)/g);
 
         let misleading: string[][] = [];
