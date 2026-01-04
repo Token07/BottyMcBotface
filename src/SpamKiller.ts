@@ -99,18 +99,16 @@ export default class SpamKiller {
         this.checkForLinks(message) || 
         this.checkForGunbuddy(message) || 
         this.checkForPlayerSupport(message) || 
+        await this.checkExternalClassifier(message) ||
         this.checkForCryptoWords(message) || 
         this.checkForDupes(message) || 
         this.checkForFlood(message) ||
-        this.checkForMisleadingLinks(message) ||
-        this.checkForTelegramSpam(message);
+        this.checkForMisleadingLinks(message);
 
         if (!message.member) return; // This shouldn't happen but...
         const memberMessageHistory = this.messageHistory.get(message.member?.id) || [];
         memberMessageHistory.push(message);
         this.messageHistory.set(message.member.id, memberMessageHistory);
-        
-        await this.checkExternalClassifier(message);
     }
     checkInviteLinkSpam(message: Discord.Message) {
         if (!message.guild) return false;
@@ -138,18 +136,6 @@ export default class SpamKiller {
                 }).catch(() => {});
             }
         }
-        return false;
-    }
-    checkForTelegramSpam(message: Discord.Message<boolean>) {
-        //if (!this.caughtSpammingLinks.has(message.author.id)) return;
-        if (message.content.indexOf("(HOW)") !== -1
-            && message.content.indexOf("commission") !== -1
-            && message.content.indexOf("crypto") !== -1) {
-            console.log("High confidence of crypto spam from " + `<@${message.author.id}>`)
-            const reportChannel = this.bot.guilds.cache.find(gc => gc.id == this.sharedSettings.server.guildId)?.channels.cache.find(cc => cc.name == this.sharedSettings.server.guruLogChannel && cc.type == Discord.ChannelType.GuildText);
-            if (reportChannel && reportChannel instanceof Discord.TextChannel) reportChannel.send(`SpamKiller: Message may be crpto spam: https://discordapp.com/channels/${message.guild?.id}/${message.channel.id}/${message.id})`);
-        }
-
         return false;
     }
     checkForMisleadingLinks(message: Discord.Message) {
