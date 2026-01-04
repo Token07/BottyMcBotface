@@ -20,7 +20,7 @@ interface ClassifierResponse {
 }
 
 interface SpamKillerRule {
-    function: (message: Discord.Message) => boolean | SpamKillerResult | Promise<false | undefined>,
+    function: (message: Discord.Message) => boolean | SpamKillerResult | Promise<false | undefined | SpamKillerResult>,
     action: "LOG" | "WARNCUSTOM" | "WARN" | "HOLD" | "KICK" | "MESSAGE_CLEANUP",
     result?: any
 }
@@ -172,14 +172,15 @@ export default class SpamKiller {
             return;
         }
     }
-    checkInviteLinkSpam(message: Discord.Message) {
+    async checkInviteLinkSpam(message: Discord.Message) {
         if (!message.guild) return false;
         const inviteRegex = /(?:https?:\/\/)?(?:www\.)?(?:discord(?:app)?\.com\/invite|discord\.gg)\/([a-z0-9-]+)/i;
         const bad = ['nsfw', 'onlyfans', 'nudes', '18+', '+18', 'egirls', '🍑'];
         if (inviteRegex.test(message.content)) {
             const inviteLinks = message.content.match(inviteRegex) || [];
             for (const link of inviteLinks) {
-                this.bot.fetchInvite(link).then(inviteInfo => {
+                try {
+                    const inviteInfo = await this.bot.fetchInvite(link)
                     if (!inviteInfo.guild) return;
                     const guildNameLower = inviteInfo.guild.name.toLowerCase().split(" ");
                     const hasBad = bad.some(word => guildNameLower.includes(word));
@@ -188,7 +189,10 @@ export default class SpamKiller {
                         result: true,
                         auditLogReason: "Spamming NSFW invite links"
                     } as SpamKillerResult;
-                }).catch(() => {});
+                }
+                catch (e) {
+                    console.warn("Spamkiller: Failed to resolve invite link " + link, e.stack);
+                }
             }
         }
         return false;
@@ -416,9 +420,13 @@ export default class SpamKiller {
             .setColor(0xffcc00)
             .setThumbnail("https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Antu_dialog-warning.svg/240px-Antu_dialog-warning.svg.png")
             .setDescription("We require users to verify that they are human before they are allowed to post a link. If you are a human, react with :+1: to this message to gain link privileges. If you are a bot, please go spam somewhere else. 👍");
-        this.addViolatingMessage(message, {content: `Hey, ${message.author} If you are a human, react with :+1: to this message`, embeds: [embed] });
-
-        return true;
+        return {
+            result: true,
+            userMessage: {
+                content: `Hey, ${message.author} If you are a human, react with :+1: to this message`,
+                embeds: [embed]
+            } as Discord.MessageCreateOptions,
+        } as SpamKillerResult
     }
 
     async checkExternalClassifier(message: Discord.Message) {
