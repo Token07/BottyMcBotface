@@ -150,22 +150,22 @@ export default class SpamKiller {
                 return;
         }
         const kickRules = triggeredRules.filter(r => r.action === "KICK");
+        const warnCustomRules = triggeredRules.filter(r => r.action === "WARNCUSTOM");
+        const warnRules = triggeredRules.filter(r => r.action === "WARN");
+        const holdRules = triggeredRules.filter(r => r.action === "HOLD");
         if (kickRules.length > 0) {
             this.kickAction(message, kickRules[0]);
             return;
         }
-        const warnCustomRules = triggeredRules.filter(r => r.action === "WARNCUSTOM");
-        if (warnCustomRules.length > 0) {
+        else if (warnCustomRules.length > 0) {
             this.warnCustomAction(message, warnCustomRules[0]);
             return;
         }
-        const warnRules = triggeredRules.filter(r => r.action === "WARN");
-        if (warnRules.length > 0) {
+        else if (warnRules.length > 0) {
             this.warnAction(message, warnRules[0]);
             return;
         }
-        const holdRules = triggeredRules.filter(r => r.action === "HOLD");
-        if (holdRules.length > 0) {
+        else if (holdRules.length > 0) {
             this.holdAction(message, holdRules[0]);
             return;
         }
