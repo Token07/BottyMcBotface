@@ -513,7 +513,6 @@ export default class SpamKiller {
             }
             return;
         }
-        if (allowThrough) {}
         let response = await message.channel.send(warningMessage);
 
         if (Array.isArray(response))
