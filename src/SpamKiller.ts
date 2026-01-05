@@ -390,6 +390,7 @@ export default class SpamKiller {
             else { overrideDefaultAction = "WARNCUSTOM" };
             return {
                 result: true,
+                overrideDefaultAction
             } as SpamKillerResult
         }
 
