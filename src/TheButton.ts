@@ -83,7 +83,14 @@ export default class TheButton {
                 components: [
                     new Discord.ActionRowBuilder<Discord.ButtonBuilder>().addComponents(new Discord.ButtonBuilder().setCustomId("the_button").setLabel(this.buttonData.presses.length.toString()).setStyle(Discord.ButtonStyle.Primary))
                 ]
-            } as Discord.MessageEditOptions)
+                } as Discord.MessageEditOptions)
+            }
+            else {
+                await this.message.edit({
+                components: [
+                    new Discord.ActionRowBuilder<Discord.ButtonBuilder>().addComponents(new Discord.ButtonBuilder().setCustomId("the_button").setLabel("???").setStyle(Discord.ButtonStyle.Primary))
+                ]
+                } as Discord.MessageEditOptions)
             }
         }
         catch (e) {
