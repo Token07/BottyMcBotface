@@ -79,9 +79,9 @@ export default class TheButton {
             const random = Math.random();
 
             if (random > 0.5 && this.message && this.message.editable) {
-                this.message.edit({
+                await this.message.edit({
                 components: [
-                    new Discord.ActionRowBuilder<Discord.ButtonBuilder>().addComponents(new Discord.ButtonBuilder().setCustomId("the_button").setLabel("???").setStyle(Discord.ButtonStyle.Primary))
+                    new Discord.ActionRowBuilder<Discord.ButtonBuilder>().addComponents(new Discord.ButtonBuilder().setCustomId("the_button").setLabel(this.buttonData.presses.length.toString()).setStyle(Discord.ButtonStyle.Primary))
                 ]
             } as Discord.MessageEditOptions)
             }
