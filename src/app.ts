@@ -21,6 +21,7 @@ import SpamKiller from "./SpamKiller";
 import Admin from "./Admin";
 import GameData from "./GameData";
 import InteractionManager from "./InteractionManager";
+import TheButton from "./TheButton";
 
 // Load and initialise settings
 const sharedSettings = overrideFileBackedObject<SharedSettings>("settings/shared_settings.json", "private/shared_settings.json");
@@ -46,7 +47,7 @@ const endpoint = new Endpoint(sharedSettings, "data/endpoints.json");
 const pageDiffer = new PageDiffer(bot.client, sharedSettings, "data/page_differ.json");
 const spamKiller = new SpamKiller(bot.client, sharedSettings);
 const gameData = new GameData(bot.client, sharedSettings);
-
+const theButton = new TheButton(bot.client, sharedSettings);
 // Commands controller commands
 controller.registerCommand(commandList.controller.toggle, controller.onToggle.bind(controller));
 controller.registerCommand(commandList.controller.help, controller.onHelp.bind(controller));
