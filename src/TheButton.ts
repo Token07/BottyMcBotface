@@ -19,6 +19,7 @@ export default class TheButton {
     private botty: Discord.Client;
     private buttonData: ButtonData;
     private sharedSettings: SharedSettings;
+    private message: Discord.Message;
 
     public constructor(botty: Discord.Client, sharedSettings: SharedSettings) {
         if (!fs.existsSync("data/thebutton.json")) {
@@ -45,17 +46,18 @@ export default class TheButton {
             let message;
             try {
                 if (this.buttonData.messageId) message = await buttonChannel.messages.fetch(this.buttonData.messageId);
+                if (message) this.message = message;
             }
             catch {
                 message = false;
             }
-            if (message) return true;
             const messageInfo = await buttonChannel.send({
                 components: [
                     new Discord.ActionRowBuilder<Discord.ButtonBuilder>().addComponents(new Discord.ButtonBuilder().setCustomId("the_button").setLabel("???").setStyle(Discord.ButtonStyle.Primary))
                 ]
             } as Discord.MessageCreateOptions);
             this.buttonData.messageId = messageInfo.id;
+            this.message = messageInfo;
         }
         catch (e) {
             console.error("Failed to initialize the button", e.stack);
@@ -73,6 +75,16 @@ export default class TheButton {
         try {
             if (!inserted) return await interaction.reply({content: "<:429:344978692826726402>", ephemeral: true})
             await interaction.deferUpdate();
+
+            const random = Math.random();
+
+            if (random > 0.5 && this.message && this.message.editable) {
+                this.message.edit({
+                components: [
+                    new Discord.ActionRowBuilder<Discord.ButtonBuilder>().addComponents(new Discord.ButtonBuilder().setCustomId("the_button").setLabel("???").setStyle(Discord.ButtonStyle.Primary))
+                ]
+            } as Discord.MessageEditOptions)
+            }
         }
         catch (e) {
             console.error(e, e.stack);
