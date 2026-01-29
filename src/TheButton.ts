@@ -99,7 +99,7 @@ export default class TheButton {
                         return await interaction.reply({content: "Nice", ephemeral: true});
                     }
                     else if (userPressInfo.count > 15 && !userPressInfo.riddleAnswered) {
-                        const riddle = "You come across a printout of what appears to be a blog post, but it's in rough shape. The text is smudged and torn in places. From what you can make out, it seems to be about an old-school experience (but nothing to do with that MMO written in Java), and you can barely read some of the names on the winners list. Several of the names you can make out appear to end in NA. Further down in the smudged text you barely make out the word \"travel.\"\n\nYou want to view the full post on your laptop, but the end of the URL is missing. What are the last few characters after the last `/`?";
+                        const riddle = "You come across a printout of what appears to be a blog post, but it's in rough shape. The text is smudged and torn in places. From what you can make out, it seems to be about an old-school experience (but nothing to do with that MMO written in Java), and you can barely read some of the names on the winners list. Several of the names you can make out appear to end in NA. Further down in the smudged text you barely make out the word \"travel.\"\n\nSupringly, the URL at the bottom of the paper is mostly intact. The end of the path is missing, but you're no fool and can figure it out. What are the characters after the last `/`?";
                         return await interaction.reply({
                             content: riddle,
                             components: [
