@@ -135,7 +135,7 @@ export default class TheButton {
                 ]
                 } as Discord.MessageEditOptions)
             } */
-            return await interaction.reply({content: "You pressed the button. Nothing seems to have changed, or did it?"});
+            return await interaction.reply({content: "You pressed the button. Nothing seems to have changed, or did it?", ephemeral: true});
         }
         catch (e) {
             console.error(e, e.stack);
