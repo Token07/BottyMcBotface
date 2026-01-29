@@ -70,12 +70,10 @@ export default class TheButton {
         }
     }
     public async onInteraction(interaction: Discord.Interaction) {
-
         let inserted;
         if (!interaction.isButton()) return false;
         if (interaction.message.id !== this.buttonData.messageId) return false;
 
-        interaction.deferReply({ephemeral: true});
         if (this.buttonData.presses.find((p => p.userId === interaction.user.id)) === undefined) {
             inserted = true;
             this.buttonData.presses.push({userId: interaction.user.id, interactionId: interaction.id})
@@ -87,13 +85,13 @@ export default class TheButton {
                 if (userPressInfo) {
                     userPressInfo.count++;
                     if (userPressInfo.count === 6) {
-                        return await interaction.editReply({content: "7?",});
+                        return await interaction.reply({content: "7?", ephemeral: true});
                     }
                     else if (userPressInfo.count === 67) {
-                        return await interaction.editReply({content: "6-7"});
+                        return await interaction.reply({content: "6-7", ephemeral: true});
                     }
                     else if (userPressInfo.count === 69) {
-                        return await interaction.editReply({content: "Nice"});
+                        return await interaction.reply({content: "Nice", ephemeral: true});
                     }
                 }
                 else {
@@ -116,7 +114,7 @@ export default class TheButton {
                 ]
                 } as Discord.MessageEditOptions)
             }
-            // return await interaction.deferUpdate();
+            return await interaction.deferUpdate();
         }
         catch (e) {
             console.error(e, e.stack);
