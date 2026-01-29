@@ -6,6 +6,8 @@ const { performance } = require('perf_hooks');
 import Discord = require("discord.js");
 import fs = require("fs");
 import { contents } from "cheerio/lib/api/traversing";
+import { ButtonBuilder, TextInputBuilder } from "@discordjs/builders";
+import { ButtonStyle } from "discord.js";
 
 interface ButtonData {
     messageId: Discord.Snowflake,
@@ -14,7 +16,8 @@ interface ButtonData {
 }
 interface PressCount {
     userId: Discord.Snowflake,
-    count: number
+    count: number,
+    riddleAnswered?: boolean;
 }
 interface ButtonPresses {
     userId: Discord.Snowflake,
@@ -71,7 +74,9 @@ export default class TheButton {
     }
     public async onInteraction(interaction: Discord.Interaction) {
         let inserted;
+        if (interaction.isModalSubmit() && interaction.customId === "riddleModal") return await this.onRiddleAnswerSubmit(interaction);
         if (!interaction.isButton()) return false;
+        if (interaction.customId === "riddle") return await this.onRiddleAnswerButton(interaction);
         if (interaction.message.id !== this.buttonData.messageId) return false;
 
         if (this.buttonData.presses.find((p => p.userId === interaction.user.id)) === undefined) {
@@ -81,7 +86,7 @@ export default class TheButton {
         try {
             // if (!inserted) return await interaction.reply({content: "<:429:344978692826726402>", ephemeral: true})
             if (!inserted) {
-                const userPressInfo = this.buttonData.additionalPresses.find(u => u.userId === interaction.user.id)
+                const userPressInfo = this.buttonData.additionalPresses.find(u => u.userId === interaction.user.id);
                 if (userPressInfo) {
                     userPressInfo.count++;
                     if (userPressInfo.count === 6) {
@@ -92,6 +97,22 @@ export default class TheButton {
                     }
                     else if (userPressInfo.count === 69) {
                         return await interaction.reply({content: "Nice", ephemeral: true});
+                    }
+                    else if (userPressInfo.count > 15 && !userPressInfo.riddleAnswered) {
+                        const riddle = "You come across a printout of what appears to be a blog post, but it's in rough shape. The text is smudged and torn in places. From what you can make out, it seems to be about an old-school experience (but nothing to do with that MMO written in Java), and you can barely read some of the names on the winners list.\n\nYou want to view the full post on your laptop, but the end of the URL is missing. What are the last few characters after the last `/`?";
+                        await interaction.reply({
+                            content: riddle,
+                            components: [
+                                new Discord.ActionRowBuilder<ButtonBuilder>()
+                                    .addComponents(
+                                        new ButtonBuilder()
+                                            .setCustomId("riddle")
+                                            .setStyle(ButtonStyle.Primary)
+                                            .setLabel("Answer")
+                                        )
+                            ],
+                            ephemeral: true
+                        });
                     }
                 }
                 else {
@@ -118,6 +139,39 @@ export default class TheButton {
         }
         catch (e) {
             console.error(e, e.stack);
+        }
+    }
+    private async onRiddleAnswerButton(interaction: Discord.Interaction) {
+        if (!interaction.isButton()) return;
+        const modal = new Discord.ModalBuilder()
+            .setCustomId('riddleModal')
+            .setTitle('Riddle Challenge');
+
+        const answerInput = new Discord.TextInputBuilder()
+            .setCustomId('riddleAnswer')
+            .setLabel("What are the last few characters?")
+            .setStyle(Discord.TextInputStyle.Short)
+            .setPlaceholder('Type your answer here...')
+            .setRequired(true);
+
+        const row = new Discord.ActionRowBuilder<TextInputBuilder>().addComponents(answerInput);
+        modal.addComponents(row);
+
+        await interaction.showModal(modal);
+    }
+    private async onRiddleAnswerSubmit(interaction: Discord.Interaction) {
+        if (!interaction.isModalSubmit()) return;
+        if (interaction.customId !== 'riddleModal') return;
+
+        const userAnswer = interaction.fields.getTextInputValue('riddleAnswer');
+
+        if (userAnswer.toLowerCase() === 'af-recap') {
+            const userPressInfo = this.buttonData.additionalPresses.find(u => u.userId === interaction.user.id);
+            userPressInfo!.riddleAnswered = true;
+            await interaction.reply({ content: 'Correct, but the prize machine is empty, sorry.', ephemeral: true });
+        }
+        else {
+            await interaction.reply({ content: 'Incorrect, try again!', ephemeral: true });
         }
     }
 }
