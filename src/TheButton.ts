@@ -73,9 +73,9 @@ export default class TheButton {
             this.buttonData.presses.push({userId: interaction.user.id, interactionId: interaction.id})
         }
         try {
-            if (!inserted) return await interaction.reply({content: "<:429:344978692826726402>", ephemeral: true})
+            // if (!inserted) return await interaction.reply({content: "<:429:344978692826726402>", ephemeral: true})
             await interaction.deferUpdate();
-
+            if (!inserted) return;
             const random = Math.random();
 
             if (random > 0.5 && this.message && this.message.editable) {
