@@ -9,7 +9,12 @@ import { contents } from "cheerio/lib/api/traversing";
 
 interface ButtonData {
     messageId: Discord.Snowflake,
-    presses: ButtonPresses[]
+    presses: ButtonPresses[],
+    additionalPresses: PressCount[]
+}
+interface PressCount {
+    userId: Discord.Snowflake,
+    count: number
 }
 interface ButtonPresses {
     userId: Discord.Snowflake,
@@ -30,6 +35,7 @@ export default class TheButton {
         this.sharedSettings = sharedSettings;
 
         if (!this.buttonData.presses) this.buttonData.presses = [];
+        if (!this.buttonData.additionalPresses) this.buttonData.additionalPresses = []
         this.botty.on('ready', this.onReady.bind(this));
         this.botty.on('interactionCreate', this.onInteraction.bind(this));
     }
@@ -74,21 +80,38 @@ export default class TheButton {
         }
         try {
             // if (!inserted) return await interaction.reply({content: "<:429:344978692826726402>", ephemeral: true})
-            await interaction.deferUpdate();
-            if (!inserted) return;
+            if (!inserted) {
+                const userPressInfo = this.buttonData.additionalPresses.find(u => u.userId === interaction.user.id)
+                if (userPressInfo) {
+                    userPressInfo.count++;
+                    if (userPressInfo.count === 6) {
+                        return await interaction.reply({content: "7?", ephemeral: true});
+                    }
+                    else if (userPressInfo.count === 67) {
+                        return await interaction.reply({content: "6-7", ephemeral: true});
+                    }
+                    else if (userPressInfo.count === 69) {
+                        return await interaction.reply({content: "Nice", ephemeral: true});
+                    }
+                }
+                else {
+                    this.buttonData.additionalPresses.push({userId: interaction.user.id, count: 1});
+                }
+                return await interaction.deferUpdate();
+            }
             const random = Math.random();
 
             if (random > 0.5 && this.message && this.message.editable) {
                 await this.message.edit({
                 components: [
-                    new Discord.ActionRowBuilder<Discord.ButtonBuilder>().addComponents(new Discord.ButtonBuilder().setCustomId("the_button").setLabel(this.buttonData.presses.length.toString()).setStyle(Discord.ButtonStyle.Primary))
+                    new Discord.ActionRowBuilder<Discord.ButtonBuilder>().addComponents(new Discord.ButtonBuilder().setCustomId("the_button").setLabel(this.buttonData.presses.length.toString()).setStyle(Math.floor(Math.random()*5) + 1))
                 ]
                 } as Discord.MessageEditOptions)
             }
             else {
                 await this.message.edit({
                 components: [
-                    new Discord.ActionRowBuilder<Discord.ButtonBuilder>().addComponents(new Discord.ButtonBuilder().setCustomId("the_button").setLabel("???").setStyle(Discord.ButtonStyle.Primary))
+                    new Discord.ActionRowBuilder<Discord.ButtonBuilder>().addComponents(new Discord.ButtonBuilder().setCustomId("the_button").setLabel("???").setStyle(Math.floor(Math.random()*5) + 1))
                 ]
                 } as Discord.MessageEditOptions)
             }
