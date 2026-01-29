@@ -103,14 +103,14 @@ export default class TheButton {
             if (random > 0.5 && this.message && this.message.editable) {
                 await this.message.edit({
                 components: [
-                    new Discord.ActionRowBuilder<Discord.ButtonBuilder>().addComponents(new Discord.ButtonBuilder().setCustomId("the_button").setLabel(this.buttonData.presses.length.toString()).setStyle(Math.floor(Math.random()*5) + 1))
+                    new Discord.ActionRowBuilder<Discord.ButtonBuilder>().addComponents(new Discord.ButtonBuilder().setCustomId("the_button").setLabel(this.buttonData.presses.length.toString()).setStyle(Math.floor(Math.random()*4) + 1))
                 ]
                 } as Discord.MessageEditOptions)
             }
             else {
                 await this.message.edit({
                 components: [
-                    new Discord.ActionRowBuilder<Discord.ButtonBuilder>().addComponents(new Discord.ButtonBuilder().setCustomId("the_button").setLabel("???").setStyle(Math.floor(Math.random()*5) + 1))
+                    new Discord.ActionRowBuilder<Discord.ButtonBuilder>().addComponents(new Discord.ButtonBuilder().setCustomId("the_button").setLabel("???").setStyle(Math.floor(Math.random()*4) + 1))
                 ]
                 } as Discord.MessageEditOptions)
             }
