@@ -97,7 +97,6 @@ export default class TheButton {
                 else {
                     this.buttonData.additionalPresses.push({userId: interaction.user.id, count: 1});
                 }
-                return await interaction.deferUpdate();
             }
             const random = Math.random();
 
@@ -115,6 +114,7 @@ export default class TheButton {
                 ]
                 } as Discord.MessageEditOptions)
             }
+            return await interaction.deferUpdate();
         }
         catch (e) {
             console.error(e, e.stack);
