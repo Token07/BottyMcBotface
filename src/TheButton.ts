@@ -99,8 +99,8 @@ export default class TheButton {
                         return await interaction.reply({content: "Nice", ephemeral: true});
                     }
                     else if (userPressInfo.count > 15 && !userPressInfo.riddleAnswered) {
-                        const riddle = "You come across a printout of what appears to be a blog post, but it's in rough shape. The text is smudged and torn in places. From what you can make out, it seems to be about an old-school experience (but nothing to do with that MMO written in Java), and you can barely read some of the names on the winners list.\n\nYou want to view the full post on your laptop, but the end of the URL is missing. What are the last few characters after the last `/`?";
-                        await interaction.reply({
+                        const riddle = "You come across a printout of what appears to be a blog post, but it's in rough shape. The text is smudged and torn in places. From what you can make out, it seems to be about an old-school experience (but nothing to do with that MMO written in Java), and you can barely read some of the names on the winners list. Several of the names you can make out appear to end in NA. Further down in the smudged text you barely make out the word \"travel.\"\n\nYou want to view the full post on your laptop, but the end of the URL is missing. What are the last few characters after the last `/`?";
+                        return await interaction.reply({
                             content: riddle,
                             components: [
                                 new Discord.ActionRowBuilder<ButtonBuilder>()
@@ -121,7 +121,7 @@ export default class TheButton {
             }
             const random = Math.random();
 
-            if (random > 0.5 && this.message && this.message.editable) {
+/*             if (random > 0.5 && this.message && this.message.editable) {
                 await this.message.edit({
                 components: [
                     new Discord.ActionRowBuilder<Discord.ButtonBuilder>().addComponents(new Discord.ButtonBuilder().setCustomId("the_button").setLabel(this.buttonData.presses.length.toString()).setStyle(Math.floor(Math.random()*4) + 1))
@@ -129,13 +129,13 @@ export default class TheButton {
                 } as Discord.MessageEditOptions)
             }
             else {
-                await this.message.edit({
+/*                 await this.message.edit({
                 components: [
                     new Discord.ActionRowBuilder<Discord.ButtonBuilder>().addComponents(new Discord.ButtonBuilder().setCustomId("the_button").setLabel("???").setStyle(Math.floor(Math.random()*4) + 1))
                 ]
                 } as Discord.MessageEditOptions)
-            }
-            return await interaction.deferUpdate();
+            } */
+            return await interaction.reply({content: "You pressed the button. Nothing seems to have changed, or did it?"});
         }
         catch (e) {
             console.error(e, e.stack);
