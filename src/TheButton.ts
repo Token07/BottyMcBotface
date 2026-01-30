@@ -85,8 +85,8 @@ export default class TheButton {
         }
         try {
             // if (!inserted) return await interaction.reply({content: "<:429:344978692826726402>", ephemeral: true})
+            const userPressInfo = this.buttonData.additionalPresses.find(u => u.userId === interaction.user.id);
             if (!inserted) {
-                const userPressInfo = this.buttonData.additionalPresses.find(u => u.userId === interaction.user.id);
                 if (userPressInfo) {
                     userPressInfo.count++;
                     if (userPressInfo.count === 6) {
@@ -114,6 +114,9 @@ export default class TheButton {
                             ephemeral: true
                         });
                     }
+                    if (userPressInfo.riddleAnswered) {
+                        await interaction.reply({content: "You press the button again and hear Silver Scrapes playing in the distance.\nhttps://www.youtube.com/watch?v=Thjagcdo4Bw", ephemeral: true});
+                    }
                 }
                 else {
                     this.buttonData.additionalPresses.push({userId: interaction.user.id, count: 1});
@@ -121,20 +124,6 @@ export default class TheButton {
             }
             const random = Math.random();
 
-/*             if (random > 0.5 && this.message && this.message.editable) {
-                await this.message.edit({
-                components: [
-                    new Discord.ActionRowBuilder<Discord.ButtonBuilder>().addComponents(new Discord.ButtonBuilder().setCustomId("the_button").setLabel(this.buttonData.presses.length.toString()).setStyle(Math.floor(Math.random()*4) + 1))
-                ]
-                } as Discord.MessageEditOptions)
-            }
-            else {
-/*                 await this.message.edit({
-                components: [
-                    new Discord.ActionRowBuilder<Discord.ButtonBuilder>().addComponents(new Discord.ButtonBuilder().setCustomId("the_button").setLabel("???").setStyle(Math.floor(Math.random()*4) + 1))
-                ]
-                } as Discord.MessageEditOptions)
-            } */
             return await interaction.reply({content: "You pressed the button. Nothing seems to have changed, or did it?", ephemeral: true});
         }
         catch (e) {
@@ -168,7 +157,21 @@ export default class TheButton {
         if (userAnswer.toLowerCase() === 'af-recap') {
             const userPressInfo = this.buttonData.additionalPresses.find(u => u.userId === interaction.user.id);
             userPressInfo!.riddleAnswered = true;
-            await interaction.reply({ content: 'Correct, but the prize machine is empty, sorry.', ephemeral: true });
+            const prizeRole = await interaction.guild?.roles.cache.get("1466597661699346535");
+            if (prizeRole && interaction.guild) {
+                try {
+                    const member = interaction.guild.members.cache.get(interaction.user.id);
+                    if (member) {
+                        await member.roles.add(prizeRole);
+                        await interaction.reply({ content: 'You solved the mystery and gained a role!', ephemeral: true });
+                    }
+                }
+                catch (e) {
+                    await interaction.reply({ content: 'Correct, but unfortunately the prize machine broke. @ Jacob in off-topic to claim your prize', ephemeral: true });
+                    console.error(e, e.stack);
+                }
+            }
+            await interaction.reply({ content: 'Correct, but either you answered in a DM or the prize machine broke.', ephemeral: true });
         }
         else {
             const hint = "You type the URL in your browser and it responds with `404 - Not Found.`\nYou walk around a bit and stumble across another printout of a post from a different blog. This one is in slightly better shape and reads more like a technical deep dive, though the page layout looks a little dated. You can make out mentions of encryption and salts. Towards the end, you spot a reference to the blog post from the first printout. This can't be coincidence, could it?";
