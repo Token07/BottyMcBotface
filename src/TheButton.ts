@@ -56,6 +56,7 @@ export default class TheButton {
             try {
                 if (this.buttonData.messageId) message = await buttonChannel.messages.fetch(this.buttonData.messageId);
                 if (message) this.message = message;
+                return;
             }
             catch {
                 message = false;
