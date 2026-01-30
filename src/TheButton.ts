@@ -171,7 +171,9 @@ export default class TheButton {
                     console.error(e, e.stack);
                 }
             }
-            await interaction.reply({ content: 'Correct, but either you answered in a DM or the prize machine broke.', ephemeral: true });
+            else {
+                await interaction.reply({ content: 'Correct, but either you answered in a DM or the prize machine broke.', ephemeral: true });
+            }
         }
         else {
             const hint = "You type the URL in your browser and it responds with `404 - Not Found.`\nYou walk around a bit and stumble across another printout of a post from a different blog. This one is in slightly better shape and reads more like a technical deep dive, though the page layout looks a little dated. You can make out mentions of encryption and salts. Towards the end, you spot a reference to the blog post from the first printout. This can't be coincidence, could it?";
