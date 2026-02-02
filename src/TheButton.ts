@@ -116,7 +116,7 @@ export default class TheButton {
                         });
                     }
                     if (userPressInfo.riddleAnswered) {
-                        await interaction.reply({content: "You press the button again and hear Silver Scrapes playing in the distance.\nhttps://www.youtube.com/watch?v=Thjagcdo4Bw", ephemeral: true});
+                        return await interaction.reply({content: "You press the button again and hear Silver Scrapes playing in the distance.\nhttps://www.youtube.com/watch?v=Thjagcdo4Bw", ephemeral: true});
                     }
                 }
                 else {
