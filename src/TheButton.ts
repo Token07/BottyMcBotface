@@ -39,7 +39,7 @@ export default class TheButton {
 
         if (!this.buttonData.presses) this.buttonData.presses = [];
         if (!this.buttonData.additionalPresses) this.buttonData.additionalPresses = []
-        this.botty.on('ready', this.onReady.bind(this));
+        this.botty.on('clientReady', this.onReady.bind(this));
         this.botty.on('interactionCreate', this.onInteraction.bind(this));
     }
 
