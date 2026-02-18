@@ -132,38 +132,32 @@ export default class AutoReact {
     private onToggleReactRequest(message: Discord.Message | Discord.CommandInteraction, authorId: string) {
 
         const reactIndex = this.ignoreUsers.indexOf(authorId);
-        const resp = (message instanceof Discord.CommandInteraction) ? {content: "", flags: Discord.MessageFlags.Ephemeral} : {content: ""};
 
         // Add
         if (reactIndex === -1) {
             this.ignoreUsers.push(authorId);
-            resp.content = "I will no longer react to your messages";
-            message.reply(resp);
+            message.reply("I will no longer react to your messages");
             return;
         }
 
         // Remove
         this.ignoreUsers.splice(reactIndex, 1);
-        resp.content = "I will now react to your messages"
-        message.reply(resp);
+        message.reply("I will now react to your messages");
     }
 
     private onToggleThinkingRequest(message: Discord.Message | Discord.CommandInteraction, authorId: string) {
 
         const thinkIndex = this.thinkingUsers.indexOf(authorId);
-        const resp = (message instanceof Discord.CommandInteraction) ? {content: "", flags: Discord.MessageFlags.Ephemeral} : {content: ""};
         // Add
         if (thinkIndex === -1) {
             this.thinkingUsers.push(authorId);
-            resp.content = "I will now only reply with default thinking emojis.";
-            message.reply(resp);
+            message.reply("I will now only reply with default thinking emojis.");
             return;
         }
 
         // Remove
         this.thinkingUsers.splice(thinkIndex, 1);
-        resp.content = "I will no longer only reply with default thinking emojis."
-        message.reply(resp);
+        message.reply("I will no longer only reply with default thinking emojis.");
     }
 
     private onGreeting(message: Discord.Message) {
