@@ -72,7 +72,7 @@ export default class ESportsAPI {
         this.bot = bot;
         this.settings = settings;
 
-        bot.on("ready", async () => {
+        bot.on("clientReady", async () => {
 
             const channel = this.settings.esports.printChannel;
             const guild = this.bot.guilds.cache.get(this.settings.server.guildId);
@@ -138,7 +138,7 @@ export default class ESportsAPI {
         if (interaction.guild && interaction.channelId == this.esportsChannel?.id) ephemeral = false;
 
         date = this.strToDate(dateOption);
-        if (date == false) return interaction.reply({content: "The date you specified didn't match the format needed. (MM/DD or YYYY/MM/DD)", ephemeral: true});
+        if (date == false) return interaction.reply({content: "The date you specified didn't match the format needed. (MM/DD or YYYY/MM/DD)", flags: Discord.MessageFlags.Ephemeral});
 
         const embed = this.getPrintout(this.schedule.get(date), date) as Discord.InteractionReplyOptions;
         embed.ephemeral = ephemeral;

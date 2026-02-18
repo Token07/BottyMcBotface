@@ -25,7 +25,7 @@ export default class AutoReact {
         this.ignoreUsers = fileBackedObject(ignoreFile);
         console.log("Successfully loaded ignore reaction file.");
 
-        this.bot.on("ready", this.onConnect.bind(this));
+        this.bot.on("clientReady", this.onConnect.bind(this));
         this.bot.on("messageCreate", this.onMessage.bind(this));
 
         this.registerInteractionCommands();
@@ -79,9 +79,9 @@ export default class AutoReact {
     public onInteraction(interaction: Discord.CommandInteraction, isAdmin?: false) {
         switch (interaction.commandName) {
             case "refresh_thinking":
-                if (!isAdmin) return interaction.reply({content: "You don't have permission to use this command", ephemeral: true})
+                if (!isAdmin) return interaction.reply({content: "You don't have permission to use this command", flags: Discord.MessageFlags.Ephemeral})
                 this.refreshThinkingEmojis();
-                interaction.reply({content: "Refreshed thinking emojis", ephemeral: true});
+                interaction.reply({content: "Refreshed thinking emojis", flags: Discord.MessageFlags.Ephemeral});
                 break;
             case "toggle_thinking":
                 this.onToggleThinkingRequest(interaction, interaction.user.id)
@@ -132,7 +132,7 @@ export default class AutoReact {
     private onToggleReactRequest(message: Discord.Message | Discord.CommandInteraction, authorId: string) {
 
         const reactIndex = this.ignoreUsers.indexOf(authorId);
-        const resp = (message instanceof Discord.CommandInteraction) ? {content: "", ephemeral: true} : {content: ""};
+        const resp = (message instanceof Discord.CommandInteraction) ? {content: "", flags: Discord.MessageFlags.Ephemeral} : {content: ""};
 
         // Add
         if (reactIndex === -1) {
@@ -151,7 +151,7 @@ export default class AutoReact {
     private onToggleThinkingRequest(message: Discord.Message | Discord.CommandInteraction, authorId: string) {
 
         const thinkIndex = this.thinkingUsers.indexOf(authorId);
-        const resp = (message instanceof Discord.CommandInteraction) ? {content: "", ephemeral: true} : {content: ""};
+        const resp = (message instanceof Discord.CommandInteraction) ? {content: "", flags: Discord.MessageFlags.Ephemeral} : {content: ""};
         // Add
         if (thinkIndex === -1) {
             this.thinkingUsers.push(authorId);

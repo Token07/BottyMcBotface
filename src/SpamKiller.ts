@@ -54,7 +54,7 @@ export default class SpamKiller {
 
         bot.on("messageReactionAdd", this.onReaction.bind(this));
         bot.on("messageCreate", this.onMessage.bind(this));
-        bot.on("ready", this.onReady.bind(this));
+        bot.on("clientReady", this.onReady.bind(this));
         bot.on("interactionCreate", this.onInteraction.bind(this));
     }
 
@@ -521,7 +521,7 @@ export default class SpamKiller {
         if (!interaction.guild
             || (!interaction.member || !(interaction.member.roles instanceof Discord.GuildMemberRoleManager)) 
             || (!interaction.member.roles.cache.hasAny(...this.sharedSettings.commands.adminRoles))) {
-                return await interaction.reply({ content: "Permission denied", ephemeral: true });
+                return await interaction.reply({ content: "Permission denied", flags: Discord.MessageFlags.Ephemeral });
         }
 
         let repost = false;
