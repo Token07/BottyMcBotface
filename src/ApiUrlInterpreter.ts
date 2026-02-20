@@ -118,7 +118,11 @@ export default class ApiUrlInterpreter {
                 continue;
             }
             path = testPath;
-
+            // Check if path is available on platform
+            if (testPath.platformsAvailable && !testPath.platformsAvailable.has(platformId)) {
+                mistakes.push(`- This endpoint is not available on this platform. Valid platforms are: ` + Array.from(testPath.platformsAvailable).join(","));
+                fatalError = true;
+            }
             // Check if path parameters are valid
             for (const param of testPath.pathParameters.values()) {
                 const paramValue: string = pathMatch[param.name];
@@ -133,7 +137,7 @@ export default class ApiUrlInterpreter {
 
             const queryParams: Map<string, string | string[]> = new Map();
             if (urlMatch.groups.query) {
-                for (const pair of urlMatch.query.split("&")) {
+                for (const pair of urlMatch.groups.query.split("&")) {
                     const [key, value] = pair.split("=");
                     // If a key is specified multiple times, it means the value is a set
                     if (queryParams.has(key)) {
