@@ -3,6 +3,7 @@ import prettyMs = require("pretty-ms");
 import { SharedSettings } from "./SharedSettings";
 import url = require("url");
 import { levenshteinDistance } from "./LevenshteinDistance";
+import SpamKillerEmbeds from "./SpamKillerEmbeds";
 
 class Violator {
     public response: Discord.Message | null;
@@ -102,7 +103,7 @@ export default class SpamKiller {
             return;
 
         // Functions return true if they delete the message. This makes sure that a message only gets deleted once
-        this.checkInviteLinkSpam(message) ||
+        await this.checkInviteLinkSpam(message) ||
         this.checkForAttachments(message) ||
         this.checkForLinks(message) || 
         this.checkForGunbuddy(message) || 
@@ -118,17 +119,17 @@ export default class SpamKiller {
         memberMessageHistory.push(message);
         this.messageHistory.set(message.member.id, memberMessageHistory);
     }
-    checkInviteLinkSpam(message: Discord.Message) {
+    async checkInviteLinkSpam(message: Discord.Message) {
         if (!message.guild) return false;
         const inviteRegex = /(?:https?:\/\/)?(?:www\.)?(?:discord(?:app)?\.com\/invite|discord\.gg)\/([a-z0-9-]+)/i;
         const bad = ['nsfw', 'onlyfans', 'nudes', '18+', '+18', 'egirls', '🍑'];
         if (inviteRegex.test(message.content)) {
             const inviteLinks = message.content.match(inviteRegex) || [];
             for (const link of inviteLinks) {
-                this.bot.fetchInvite(link).then(inviteInfo => {
-                    if (!inviteInfo.guild) return;
-                    const guildNameLower = inviteInfo.guild.name.toLowerCase().split(" ");
-                    const hasBad = bad.some(word => guildNameLower.includes(word));
+                try {
+                    const inviteInfo = await this.bot.fetchInvite(link);
+                    if (!inviteInfo.guild) return false;
+                    const hasBad = bad.some(word => inviteInfo.guild!.name.toLowerCase().split(" ").includes(word));
                     if (!hasBad) return false;
                     message.delete().catch(console.error);
                     if (message.member?.kickable) {
@@ -141,7 +142,11 @@ export default class SpamKiller {
                     else {
                         console.log(`SpamKiller: <@${message.author.id}> appears to be spamming NSFW links but isn't kickable`);
                     }
-                }).catch(() => {});
+                    return true; // Return true even if kick failed so violation is recorded
+                }
+                catch {
+                    console.warn("SpamKiller: Failed to resolve invite link " + link);
+                }
             }
         }
         return false;
@@ -193,11 +198,8 @@ export default class SpamKiller {
         const mentionsCrypto = cryptoWords.some(word => message.content.toLowerCase().indexOf(word) !== -1);
         if (!mentionsCrypto) return false;
 
-        const embed = new Discord.EmbedBuilder()
-            .setTitle("Robot Check")
-            .setColor(0xffcc00)
-            .setThumbnail("https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Antu_dialog-warning.svg/240px-Antu_dialog-warning.svg.png")
-            .setDescription("We require users to verify that they are human before they are allowed to send messages that include certain keywords. If you are a human, react with :+1: to this message. If you are a bot, please go spam somewhere else. 👍");
+        const embed = SpamKillerEmbeds.warnEmbed("Robot Check", "We require users to verify that they are human before they are allowed to send " +
+            "messages that include certain keywords. If you are a human, react with :+1: to this message. If you are a bot, please go spam somewhere else. 👍");
 
         this.addViolatingMessage(message, {content: `Hey, ${message.author} If you are a human, react with :+1: to this message`, embeds: [embed] });
         return true;
@@ -219,19 +221,7 @@ export default class SpamKiller {
         let mentionsExempt = exemptWords.some(wl => words.indexOf(wl) !== -1);
 
         if (mentionsBanOrHack && mentionsSupport && !mentionsExempt) {
-            const violationEmbed = new Discord.EmbedBuilder()
-                .setTitle("There is no game or account support here")
-                .setColor(0xff0000)
-                .setThumbnail("https://upload.wikimedia.org/wikipedia/commons/1/19/Stop2.png")
-                .setDescription(`This Discord server is for the Riot Games API, a tool which provides data to sites like op.gg. No one here will be able to help you with support or gameplay issues. If you're having account related issues or technical problems, contact Player support. If you have game feedback, see the links below.`)
-                .addFields([
-                    {name: "Player Support", value: " [Player Support](https://support.riotgames.com/hc/en-us)", inline: true},
-                    {name: "League", value: "[Discord](https://discord.gg/leagueoflegends)\n[Subreddit](https://reddit.com/leagueoflegends)", inline: true},
-                    {name: "\u200b", value: "\u200b", inline: true},
-                    {name: "Valorant", value: "[Discord](https://discord.gg/valorant)\n[Subreddit](https://reddit.com/valorant)", inline: true},
-                    {name: "LoR", value: "[Discord](https://discord.gg/LegendsOfRuneterra)\n[Subreddit](https://reddit.com/r/LegendsofRuneterra)", inline: true},
-                    {name: "\u200b", value: "\u200b", inline: true}
-                ]);
+            const violationEmbed = SpamKillerEmbeds.noSupportEmbed();
             this.addViolatingMessage(message, {content: `Hey ${message.author}, There is no game or account support here`, embeds: [violationEmbed]}, false);
 
             return true;
@@ -283,11 +273,8 @@ export default class SpamKiller {
         }
 
         if (hasGunbuddyMessage) {
-            const violationEmbed = new Discord.EmbedBuilder()
-                .setTitle("There are no gun buddies here")
-                .setColor(0xff0000)
-                .setThumbnail("https://upload.wikimedia.org/wikipedia/commons/1/19/Stop2.png")
-                .setDescription(`You triggered our spam detector. this is not a Riot Games server. There are no Rioters here, and no one can give you a gunbuddy. See <#914594958202241045> for more information`)
+            const violationEmbed = SpamKillerEmbeds.stopEmbed("There are no gun buddies here", "You triggered our spam detector. this is not a Riot Games server. " +
+                `There are no Rioters here, and no one can give you a gunbuddy. See <#914594958202241045> for more information`)
             this.addViolatingMessage(message, {content: `Hey ${message.author}, there are no gun buddies here`, embeds: [violationEmbed]}, false);
 
             return true;
@@ -297,11 +284,8 @@ export default class SpamKiller {
     }
     checkForAttachments(message: Discord.Message) {
         if (message.attachments.size >= 1) {
-            const embed = new Discord.EmbedBuilder()
-                .setTitle("Robot Check")
-                .setColor(0xffcc00)
-                .setThumbnail("https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Antu_dialog-warning.svg/240px-Antu_dialog-warning.svg.png")
-                .setDescription("We require users to verify that they are human before they are allowed to post an attachment. If you are a human, react with :+1: to this message to gain link privileges. If you are a bot, please go spam somewhere else. 👍");
+            const embed = SpamKillerEmbeds.warnEmbed("Robot Check", "We require users to verify that they are human before they are allowed to post an attachment. " +
+                "If you are a human, react with :+1: to this message to gain link privileges. If you are a bot, please go spam somewhere else. 👍");
             this.addViolatingMessage(message, {content: `Hey, ${message.author} If you are a human, react with :+1: to this message`, embeds: [embed] });
         }
     }
@@ -340,20 +324,13 @@ export default class SpamKiller {
         // Attempt to stop Mr Beast spam images
         const cdnLinkCount = message.content.match(/https:\/\/cdn\.discordapp\.com\/\S+/gi)?.length || 0;
         if (cdnLinkCount >= 3) {
-            const embed = new Discord.EmbedBuilder()
-                .setTitle("Message Removed")
-                .setColor(0xffcc00)
-                .setThumbnail("https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Antu_dialog-warning.svg/240px-Antu_dialog-warning.svg.png")
-                .setDescription("Your message matches a known spam pattern and was disallowed.");
+            const embed = SpamKillerEmbeds.warnEmbed("Message Removed", "Your message matches a known spam pattern and was disallowed.");
             this.addViolatingMessage(message, {content: `Hey, ${message.author} Your message matches a known spam pattern and was disallowed.`, embeds: [embed] }, false);
             return true;
         }
 
-        const embed = new Discord.EmbedBuilder()
-            .setTitle("Robot Check")
-            .setColor(0xffcc00)
-            .setThumbnail("https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Antu_dialog-warning.svg/240px-Antu_dialog-warning.svg.png")
-            .setDescription("We require users to verify that they are human before they are allowed to post a link. If you are a human, react with :+1: to this message to gain link privileges. If you are a bot, please go spam somewhere else. 👍");
+        const embed = SpamKillerEmbeds.warnEmbed("Robot Check", "We require users to verify that they are human before they are allowed to post a link. " +
+            "If you are a human, react with :+1: to this message to gain link privileges. If you are a bot, please go spam somewhere else. 👍");
         this.addViolatingMessage(message, {content: `Hey, ${message.author} If you are a human, react with :+1: to this message`, embeds: [embed] });
 
         return true;
@@ -628,10 +605,8 @@ export default class SpamKiller {
     private createClassifierRemovalUserMessage(message: Discord.Message, response: ClassifierResponse, extraInfo: string | undefined): Discord.MessageCreateOptions {
         return { 
             embeds: [
-                new Discord.EmbedBuilder()
-                .setTitle("Message Removed")
-                .setThumbnail("https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Antu_dialog-warning.svg/240px-Antu_dialog-warning.svg.png")
-                .setDescription(`<@${message.author.id}> Your message has been removed by an automated filter. If you believe this was an error, please contact a Guru or Admin.`)
+                SpamKillerEmbeds.warnEmbed("Message Removed", `<@${message.author.id}> Your message has been removed by an automated filter. If you believe this was an ` +
+                    `error, please contact a Guru or Admin.`)
                 .addFields({ name: "\xa0", value: extraInfo || "\xa0" })
                 .setFooter({ text: "v:" + response.mtime + " | Message scored " + response.spam_confidence.toPrecision(5) + ` | Message ID: ${ message.id }`})
             ]
