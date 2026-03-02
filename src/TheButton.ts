@@ -74,7 +74,13 @@ export default class TheButton {
         }
     }
     public async onInteraction(interaction: Discord.Interaction) {
-        let inserted;
+        if (interaction.isRepliable()) {
+            return interaction.reply({content: "The button experiement is now over", flags: Discord.MessageFlags.Ephemeral})
+        }
+        else {
+            console.warn("The Button: Recieved interaction I don't know how to handle", interaction);
+        }
+ /*        let inserted;
         if (interaction.isModalSubmit() && interaction.customId === "riddleModal") return await this.onRiddleAnswerSubmit(interaction);
         if (!interaction.isButton()) return false;
         if (interaction.customId === "riddle") return await this.onRiddleAnswerButton(interaction);
@@ -179,6 +185,6 @@ export default class TheButton {
         else {
             const hint = "You type the URL in your browser and it responds with `404 - Not Found.`\nYou walk around a bit and stumble across another printout of a post from a different blog. This one is in slightly better shape and reads more like a technical deep dive, though the page layout looks a little dated. You can make out mentions of encryption and salts. Towards the end, you spot a reference to the blog post from the first printout. This can't be coincidence, could it?";
             await interaction.reply({ content: hint, ephemeral: true });
-        }
-    }
+        } */
+    } 
 }
