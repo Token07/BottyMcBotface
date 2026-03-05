@@ -139,7 +139,7 @@ export default class VersionChecker {
                     if (!version) {
                         return console.error("Couldn't match find a game news article that matches the patch notes regex.", "Newest item: " + lastPostedPatchNotesItem?.title)
                     }
-                    console.error(`Couldn't find publish date for Patch ${lastPostedPatchNotes}. Latest found title is ${latestNotesItem}, updating latestGameVersion but not making post`);
+                    console.error(`Couldn't find publish date for Patch ${lastPostedPatchNotes}. Latest found title is ${latestNotesItem}, updating latestGameVersion to ${version[1]} but not making post`);
                     this.data.latestGameVersion = version[1];
                     return;
                 }
