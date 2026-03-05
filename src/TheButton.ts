@@ -78,7 +78,7 @@ export default class TheButton {
             return interaction.reply({content: "The button experiement is now over", flags: Discord.MessageFlags.Ephemeral})
         }
         else {
-            console.warn("The Button: Recieved interaction I don't know how to handle", interaction);
+            //console.warn("The Button: Recieved interaction I don't know how to handle", interaction);
         }
  /*        let inserted;
         if (interaction.isModalSubmit() && interaction.customId === "riddleModal") return await this.onRiddleAnswerSubmit(interaction);
