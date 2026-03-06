@@ -21,7 +21,7 @@ import SpamKiller from "./SpamKiller";
 import Admin from "./Admin";
 import GameData from "./GameData";
 import InteractionManager from "./InteractionManager";
-import TheButton from "./TheButton";
+// import TheButton from "./TheButton";
 
 // Load and initialise settings
 const sharedSettings = overrideFileBackedObject<SharedSettings>("settings/shared_settings.json", "private/shared_settings.json");
