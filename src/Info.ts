@@ -524,12 +524,18 @@ export default class Info {
         const noteName = interaction.options.get("name")?.value?.toString().toLocaleLowerCase() || "";
         const ephemeral = interaction.options.get("ephemeral")?.value as boolean ?? false;
         if (interaction.isAutocomplete()) {
+            console.debug("Info.ts: Autocomplete interaction recieved at " + new Date().toLocaleString() + 
+            "\nInteraction timestamp: "  + new Date(interaction.createdTimestamp).toLocaleString());
             const autocompleteText = interaction.options.getFocused(true).value;
             if (autocompleteText == "") return interaction.respond([...new Set<string>(this.recents)].filter(r => r.length <= 100).slice(0, 24).map((r => { return {name: r, value: r} })));
             const startsWithNotes = this.infos.filter(info => info.command.startsWith(autocompleteText));
             const matchingNotes = this.infos.filter(info => !info.command.startsWith(autocompleteText) && info.command.indexOf(autocompleteText) !== -1);
             const responses = [...startsWithNotes, ...matchingNotes].map(info => { return {name: info.command, value: info.command} });
-            return interaction.respond(responses.slice(0, 24)).catch((e) => console.error("Autocomplete interaction response failed", e.stack));
+            const rTime = new Date();
+            return interaction.respond(responses.slice(0, 24)).catch((e) => console.error("Autocomplete interaction response failed", e.stack)).then( () => {
+                console.debug("Info.ts: Autocomplete interaction submitted at: " + rTime.toLocaleString() + 
+                "\nPromise returned timestamp: "  + new Date().toLocaleString());
+            });
         }
         if (!this.validateNoteName(noteName)) return interaction.reply({content: "This note name is not valid", flags: Discord.MessageFlags.Ephemeral});
         const infoData = this.fetchInfo(noteName)
