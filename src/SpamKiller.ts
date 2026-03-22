@@ -101,7 +101,7 @@ export default class SpamKiller {
     async checkInviteLinkSpam(message: Discord.Message) {
         if (!message.guild) return false;
         const inviteRegex = /(?:https?:\/\/)?(?:www\.)?(?:discord(?:app)?\.com\/invite|discord\.gg)\/([a-z0-9-]+)/i;
-        const bad = ['nsfw', 'onlyfans', 'nudes', '18+', '+18', 'egirls', 'e-girls', '🍑'];
+        const bad = ['nsfw', 'onlyfans', 'nudes', '18+', '+18', 'egirls', 'e-girls', '🍑', '🍒'];
         if (inviteRegex.test(message.content)) {
             const inviteLinks = message.content.match(inviteRegex) || [];
             for (const link of inviteLinks) {
