@@ -41,7 +41,7 @@ export default class InteractionManager {
         if (!this.clientId) {
             console.warn("InteractionManager: Client ID not set in shared_settings.json, will try to use user id");
             // Wait until connected to discord to continue
-            if (!this.botty.client.readyAt) await new Promise((resolve) => this.botty.client.once('ready', resolve));
+            if (!this.botty.client.readyAt) await new Promise((resolve) => this.botty.client.once('clientReady', resolve));
             if (this.botty.client.user && this.botty.client.user.id) this.clientId = this.botty.client.user.id
         }
         const adminCommands = [
