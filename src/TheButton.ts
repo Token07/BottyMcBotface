@@ -5,7 +5,6 @@ const { performance } = require('perf_hooks');
 
 import Discord = require("discord.js");
 import fs = require("fs");
-import { contents } from "cheerio/lib/api/traversing";
 import { ButtonBuilder, TextInputBuilder } from "@discordjs/builders";
 import { ButtonStyle } from "discord.js";
 
