@@ -1,7 +1,7 @@
-import Discord = require("discord.js");
-import prettyMs = require("pretty-ms");
+import * as Discord from "discord.js";
+import * as prettyMs from "pretty-ms";
 import { SharedSettings } from "./SharedSettings";
-import url = require("url");
+import * as url from "url";
 import { levenshteinDistance } from "./LevenshteinDistance";
 import SpamKillerEmbeds from "./SpamKillerEmbeds";
 
@@ -100,6 +100,10 @@ export default class SpamKiller {
     }
     async checkInviteLinkSpam(message: Discord.Message) {
         if (!message.guild) return false;
+        const serverWhitelist = ['187652476080488449', '361907254997417985', '719117730636365825',
+             '723704236239618158','324595697255055360', '342988445498474498', '361907254997417985',
+            '249481856687407104', '679875946597056683', '631237936855384075', '417825368062558219',
+            '593348588239716373', '125440014904590336', '181911712201441280']
         const inviteRegex = /(?:https?:\/\/)?(?:www\.)?(?:discord(?:app)?\.com\/invite|discord\.gg)\/([a-z0-9-]+)/i;
         const bad = ['nsfw', 'onlyfans', 'nudes', '18+', '+18', 'egirls', '🍑'];
         if (inviteRegex.test(message.content)) {
@@ -109,7 +113,15 @@ export default class SpamKiller {
                     const inviteInfo = await this.bot.fetchInvite(link);
                     if (!inviteInfo.guild) return false;
                     const hasBad = bad.some(word => inviteInfo.guild!.name.toLowerCase().split(" ").includes(word));
-                    if (!hasBad) return false;
+                    if (!hasBad) {
+                        if (!serverWhitelist.includes(inviteInfo.guild.id)) {
+                            const embed = SpamKillerEmbeds.warnEmbed("Robot Check", "We require users to verify that they are human before they are allowed to send " +
+                                "invite links. If you are a human, react with :+1: to this message. If you are a bot, please go spam somewhere else. 👍");
+
+                            this.addViolatingMessage(message, {content: `Hey, ${message.author} If you are a human, react with :+1: to this message`, embeds: [embed] });
+                        }
+                        return false;
+                    }
                     message.delete().catch(console.error);
                     if (message.member?.kickable) {
                         await message.member.kick("Spamming NSFW invite links");
@@ -340,8 +352,7 @@ export default class SpamKiller {
         return false;
     }
     async addViolatingMessage(message: Discord.Message, warningMessage: string | Discord.MessageCreateOptions, allowThrough: boolean = true) {
-
-        const guild = <Discord.Guild>message.guild; // Got to explicitly cast away null because Typescript doesn't detect this
+        const guild = message.guild as Discord.Guild; // Got to explicitly cast away null because Typescript doesn't detect this
         if (!guild && !message.guild)
             throw new Error(`Unable to find the guild where this message was found: '${message.content}' (${message.author.username})`);
 
@@ -354,7 +365,6 @@ export default class SpamKiller {
                 return console.warn(`Unable to find member that wrote the message '${message.content}' (${message.author.username})`);
             }
         }
-
         if (member.roles.cache.filter(r => !this.sharedSettings.spam.ignoredRoles.includes(r.id)).size > 1) { // Only act on people without roles
             console.log(`SpamKiller: ${message.author.username}#${message.author.discriminator}'s message triggered our spam detector, but they've got ${member.roles.cache.size} roles. (https://discordapp.com/channels/${message.guild?.id}/${message.channel.id}/${message.id})`);
             return;
