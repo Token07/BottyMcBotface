@@ -33,6 +33,7 @@ export default class SpamKiller {
     private classifierFlaggedUsers: Map<string, Discord.Message> = new Map();
     private guruLogChannel: Discord.GuildBasedChannel | undefined;
     private tempUserExemptions = new Map<string, number>();
+    private userTracker = new Map<string, {channelId: string, messageId: string, message: Discord.Message, deleted?: boolean}[]>;
 
     constructor(bot: Discord.Client, sharedSettings: SharedSettings) {
         this.sharedSettings = sharedSettings;
@@ -297,7 +298,32 @@ export default class SpamKiller {
 
         return true;
     }
+    public async checkForMultiChannelSpam(message: Discord.Message) {
+        const windowMs = 10_000; // TODO: Move to SharedSettings
+        const chanMax = 5 // TODO: Move to SharedSettings
+        if (!message.guild) return;
+        const id = message.author.id + "_" + message.guild.id;
 
+        let userDetails = this.userTracker.get(id);
+
+        if (!userDetails) {
+            this.userTracker.set(id, [{channelId: message.channel.id, messageId: message.id, message}]);
+            return;
+        }
+        userDetails.push({channelId: message.channel.id, messageId: message.id, message});
+        const cutoff = Date.now() - windowMs;
+        const messagesInWindow = userDetails.filter(entry => Number(BigInt(entry.messageId) >> 22n) + 1420070400000 > cutoff);
+        const channelCount = new Set(messagesInWindow.map(m => m.channelId)).size;
+
+        if (channelCount >= chanMax) {
+            this.sendToGuruLogChannelAndConsole(`SpamKiller: Cross-channel spam from <@${message.author.id}> across ${channelCount} channels in ${windowMs / 1000} seconds`);
+            for (const messageToDelete of messagesInWindow) {
+                if (!messageToDelete.deleted && messageToDelete.message.deletable) await messageToDelete.message.delete().catch((e) => console.error(e, e.stack));
+                messageToDelete.deleted = true;
+            }
+        }
+        this.userTracker.set(id, messagesInWindow);
+    }
     async checkExternalClassifier(message: Discord.Message) {
         if (!message.channel.isSendable()) return false;
         if (!message.guild) return false;
