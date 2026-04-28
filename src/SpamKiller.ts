@@ -537,7 +537,7 @@ export default class SpamKiller {
         let result = await fetch(this.sharedSettings.spam.externalAntiSpamServiceURL, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({text: messageContent})
+            body: JSON.stringify({messageId: message.id, channelId: message.channel.id, text: messageContent})
         });
         if (result.ok) {
             return await result.json() as ClassifierResponse;
