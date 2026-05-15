@@ -34,6 +34,8 @@ export default class SpamKiller {
     private guruLogChannel: Discord.GuildBasedChannel | undefined;
     private tempUserExemptions = new Map<string, number>();
     private userTracker = new Map<string, {channelId: string, messageId: string, message: Discord.Message, deleted?: boolean}[]>;
+    private violations: Discord.Message[] = [];
+    private violatorsFlagged: string[] = [];
 
     constructor(bot: Discord.Client, sharedSettings: SharedSettings) {
         this.sharedSettings = sharedSettings;
@@ -98,6 +100,7 @@ export default class SpamKiller {
         this.checkForMisleadingLinks(message);
 
         if (!message.member) return; // This shouldn't happen but...
+        if (this.violations.length > 100) this.violations.shift();
     }
     async checkInviteLinkSpam(message: Discord.Message) {
         if (!message.guild) return false;
@@ -382,6 +385,7 @@ export default class SpamKiller {
         if (!guild && !message.guild)
             throw new Error(`Unable to find the guild where this message was found: '${message.content}' (${message.author.username})`);
 
+        this.violations.push(message);
         let member = message.member;
         if (!member) {
             try {
@@ -390,6 +394,19 @@ export default class SpamKiller {
             catch {
                 return console.warn(`Unable to find member that wrote the message '${message.content}' (${message.author.username})`);
             }
+        }
+        const recentViolations = this.violations.filter(violatingMessage => violatingMessage.author.id == message.author.id && (Date.now() - violatingMessage.createdTimestamp) < 60_000);
+        if (recentViolations.length > 5 && !this.violatorsFlagged.includes(message.author.id) && !(message.member?.roles.cache.some(role => this.sharedSettings.commands.adminRoles.includes(role.id)))) {
+            this.violatorsFlagged.push(message.author.id);
+            if (!message.channel.isDMBased()) {
+                await member.timeout(3600 * 1000);
+                await message.channel.send(`Hold up <@${message.author.id}>, the mods need to reverify you're human.`);
+                this.sendToGuruLogChannelAndConsole(`SpamKiller: Temporarily muted <@${message.author.id}> because they triggered the spam detector too many times while having a role.`)
+
+            }
+            await Promise.all(
+                recentViolations.map(message => message.delete().catch((e) => console.error(e, e.stack)))
+            );
         }
         if (member.roles.cache.filter(r => !this.sharedSettings.spam.ignoredRoles.includes(r.id)).size > 1) { // Only act on people without roles
             console.log(`SpamKiller: ${message.author.username}#${message.author.discriminator}'s message triggered our spam detector, but they've got ${member.roles.cache.size} roles. (https://discordapp.com/channels/${message.guild?.id}/${message.channel.id}/${message.id})`);
