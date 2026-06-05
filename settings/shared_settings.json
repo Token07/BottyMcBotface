@@ -85,11 +85,7 @@
     "pageDiffer": {
         "checkInterval": 600000,
         "channel": "external-activity",
-        "pages": [{
-                "name": "Champion Update Schedule",
-                "ident": "202294884",
-                "type": "article"
-            },
+        "pages": [
             {
                 "name": "Legal Jibber Jabber",
                 "ident": "https://www.riotgames.com/en/legal",
