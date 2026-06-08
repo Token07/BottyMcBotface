@@ -356,6 +356,10 @@ export default class SpamKiller {
                 member = await guild.members.fetch(message.author.id);
             }
             catch {
+                if (this.violatorsFlagged.includes(message.author.id)) {
+                    await message.delete().catch((e) => console.warn(e, e.stack));
+                    return;
+                }
                 return console.warn(`Unable to find member that wrote the message '${message.content}' (${message.author.username})`);
             }
         }
@@ -401,7 +405,13 @@ export default class SpamKiller {
                     catch {
                         console.log("SpamKiller: Failed to DM account compromise warning to " + `<@${message.author.id}>`);
                     }
+                    if (this.violatorsFlagged.includes(message.author.id)) {
+                        return console.log(`SpamKiller: Kick requested on <@${message.author.id}> but another action is pending`);
+                    }
+                    this.violatorsFlagged.push(message.author.id);
                     await member.kick();
+                    this.violatorsFlagged = this.violatorsFlagged.filter(f => f != message.author.id);
+
                 }
                 catch (e) {
                     console.warn(e, e.stack);
