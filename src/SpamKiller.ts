@@ -400,7 +400,7 @@ export default class SpamKiller {
             }
         }
         const recentViolations = this.violations.filter(violatingMessage => violatingMessage.author.id == message.author.id && (Date.now() - violatingMessage.createdTimestamp) < 60_000);
-        if (recentViolations.length > 5 && !this.violatorsFlagged.includes(message.author.id) && !(message.member?.roles.cache.some(role => this.sharedSettings.commands.adminRoles.includes(role.id)))) {
+        if (recentViolations.length > 5 && member.roles.cache.filter(r => !this.sharedSettings.spam.ignoredRoles.includes(r.id)).size > 1 && !this.violatorsFlagged.includes(message.author.id) && !(message.member?.roles.cache.some(role => this.sharedSettings.commands.adminRoles.includes(role.id)))) {
             this.violatorsFlagged.push(message.author.id);
             if (!message.channel.isDMBased()) {
                 await member.timeout(3600 * 1000);
@@ -411,6 +411,7 @@ export default class SpamKiller {
             await Promise.all(
                 recentViolations.map(message => message.delete().catch((e) => console.error(e, e.stack)))
             );
+            return;
         }
         if (member.roles.cache.filter(r => !this.sharedSettings.spam.ignoredRoles.includes(r.id)).size > 1) { // Only act on people without roles
             console.log(`SpamKiller: ${message.author.username}#${message.author.discriminator}'s message triggered our spam detector, but they've got ${member.roles.cache.size} roles. (https://discordapp.com/channels/${message.guild?.id}/${message.channel.id}/${message.id})`);
