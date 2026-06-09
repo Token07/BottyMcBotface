@@ -356,10 +356,8 @@ export default class SpamKiller {
                 member = await guild.members.fetch(message.author.id);
             }
             catch {
-                if (this.violatorsFlagged.includes(message.author.id)) {
-                    await message.delete().catch((e) => console.warn(e, e.stack));
-                    return;
-                }
+                if (message.author.bot || message.author.system) return;
+                await message.delete().catch((e) => console.warn(e, e.stack));
                 return console.warn(`Unable to find member that wrote the message '${message.content}' (${message.author.username})`);
             }
         }
