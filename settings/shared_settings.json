@@ -232,7 +232,8 @@
         ],
         "ignoredRoles": [
             "1055545240058073138",
-            "1097223791836414073"
+            "1097223791836414073",
+            "1225142969837813760"
         ],
         "duplicateMessageThreshold": 4,
         "duplicateMessageTime": 30,
