@@ -238,7 +238,9 @@
         "duplicateMessageThreshold": 4,
         "duplicateMessageTime": 30,
         "floodMessageThreshold": 3,
-        "floodMessageTime": 4
+        "floodMessageTime": 4,
+        "externalAntiSpamServiceEnabled": true,
+        "externalAntiSpamServiceURL": "http://127.0.0.1:8000/check_spam"
     },
     "userIntro": {
         "icon": {
