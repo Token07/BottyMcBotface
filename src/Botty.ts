@@ -24,7 +24,7 @@ export default class Botty {
         GatewayIntentBits.GuildModeration,
         GatewayIntentBits.Guilds,
         GatewayIntentBits.MessageContent,
-    ], partials: [Partials.Channel]});
+    ], partials: [Partials.Channel, Partials.Message]});
     private personalSettings: PersonalSettings;
     private sharedSettings: SharedSettings;
 
