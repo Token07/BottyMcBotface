@@ -539,7 +539,7 @@ export default class Info {
         }
         if (!this.validateNoteName(noteName)) return interaction.reply({content: "This note name is not valid", flags: Discord.MessageFlags.Ephemeral});
         const infoData = this.fetchInfo(noteName)
-        if (infoData) return interaction.reply({content: this.prepareNote(infoData), ephemeral})
+        if (infoData) return interaction.reply({content: this.prepareNote(infoData), flags: ephemeral ? Discord.MessageFlags.Ephemeral : []})
         interaction.reply({content: "Something went wrong", flags: Discord.MessageFlags.Ephemeral});
     }
 
