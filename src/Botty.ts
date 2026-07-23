@@ -94,7 +94,7 @@ export default class Botty {
 
         this.client.on("messageUpdate", (oldMessage: Discord.OmitPartialGroupDMChannel<Discord.Message>, newMessage: Discord.OmitPartialGroupDMChannel<Discord.Message>) => {
             if (!oldMessage.channel.isSendable() || !newMessage.channel.isSendable()) return;
-            if (levenshteinDistance(oldMessage.content, newMessage.content) === 0) return; // To prevent page turning and embed loading to appear in changelog
+            if (levenshteinDistance(oldMessage.content || "", newMessage.content || "") === 0) return; // To prevent page turning and embed loading to appear in changelog
             if (oldMessage.author.bot) return; // Ignore bot in general
             if (oldMessage.channel.type === Discord.ChannelType.DM) return; // Don't output DMs
 
