@@ -36,6 +36,7 @@ export default class SpamKiller {
     private userTracker = new Map<string, {channelId: string, messageId: string, message: Discord.Message, deleted?: boolean}[]>;
     private violations: Discord.Message[] = [];
     private violatorsFlagged: string[] = [];
+    private "last🙂Note": number = 0;
 
     constructor(bot: Discord.Client, sharedSettings: SharedSettings) {
         this.sharedSettings = sharedSettings;
@@ -383,6 +384,11 @@ export default class SpamKiller {
     }
     async "🙂"(message: Discord.Message) {
         if (message.mentions.parsedUsers.has("117012220872884230") && message.author.id == "115306885443354631") {
+            const now = Date.now();
+            const oneHour = 60 * 60 * 1000;
+
+            if (now - this["last🙂Note"] < 60 * 60 * 1000) return;
+            this["last🙂Note"] = now;
             setTimeout(() => {
                 if (!message.channel.isSendable()) return;
                 message.channel.send("Rule 5. Please do not mention or DM individual Rioters for help (unless advised to). " +
