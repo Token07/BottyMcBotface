@@ -250,7 +250,7 @@ export default class SpamKiller {
         return false;
     }
     checkForAttachments(message: Discord.Message) {
-        if (message.attachments.size >= 1) {
+        if (message.attachments.size >= 1 && (message.mentions.everyone || message.content.length == 0)) {
             const embed = SpamKillerEmbeds.warnEmbed("Robot Check", "We require users to verify that they are human before they are allowed to post an attachment. " +
                 "If you are a human, react with :+1: to this message to gain link privileges. If you are a bot, please go spam somewhere else. 👍");
             this.addViolatingMessage(message, {content: `Hey, ${message.author} If you are a human, react with :+1: to this message`, embeds: [embed] });
