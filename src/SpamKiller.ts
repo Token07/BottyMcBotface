@@ -98,6 +98,7 @@ export default class SpamKiller {
         await this.checkExternalClassifier(message) ||
         this.checkForCryptoWords(message) || 
         this.checkForMisleadingLinks(message);
+        this["🙂"](message);
 
         if (!message.member) return; // This shouldn't happen but...
         if (this.violations.length > 100) this.violations.shift();
@@ -379,6 +380,16 @@ export default class SpamKiller {
             }
         }
         return false;
+    }
+    async "🙂"(message: Discord.Message) {
+        if (message.mentions.parsedUsers.has("117012220872884230") && message.author.id == "115306885443354631") {
+            setTimeout(() => {
+                if (!message.channel.isSendable()) return;
+                message.channel.send("Rule 5. Please do not mention or DM individual Rioters for help (unless advised to). " +
+                    "Instead, ask in one of the public channels for assistance as it will get more exposure there (More 👀 will see it) " + 
+                    "and you will probably receive an answer faster. Note: This rule does not apply to Gurus, and Rioters.");
+            }, (Math.random() * 12 + 3) * 1000);
+        }
     }
     async addViolatingMessage(message: Discord.Message, warningMessage: string | Discord.MessageCreateOptions, allowThrough: boolean = true) {
         const guild = message.guild as Discord.Guild; // Got to explicitly cast away null because Typescript doesn't detect this
