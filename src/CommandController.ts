@@ -72,6 +72,9 @@ export interface CommandList {
         endpoint: Command;
         endpoints: Command;
     };
+    resourcePost: {
+        resource: Command;
+    }
 }
 
 export default class CommandController {

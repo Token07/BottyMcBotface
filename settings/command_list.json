@@ -200,5 +200,14 @@
             ],
             "description": "Shows a list of all Riot API endpoints."
         }
+    },
+    "resourcePost": {
+        "resource": {
+            "admin": true,
+            "aliases": [
+                "resource"
+            ],
+            "description": "Create a post for a resource channel"
+        }
     }
 }
