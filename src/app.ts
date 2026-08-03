@@ -21,6 +21,7 @@ import SpamKiller from "./SpamKiller";
 import Admin from "./Admin";
 import GameData from "./GameData";
 import InteractionManager from "./InteractionManager";
+import ResourcePost from "./ResourcePost";
 // import TheButton from "./TheButton";
 
 // Load and initialise settings
@@ -47,6 +48,7 @@ const endpoint = new Endpoint(sharedSettings, "data/endpoints.json");
 const pageDiffer = new PageDiffer(bot.client, sharedSettings, "data/page_differ.json");
 const spamKiller = new SpamKiller(bot.client, sharedSettings);
 const gameData = new GameData(bot.client, sharedSettings);
+const resourcePost = new ResourcePost(bot.client, sharedSettings, notes, "data/resource_posts.json");
 // const theButton = new TheButton(bot.client, sharedSettings);
 // Commands controller commands
 controller.registerCommand(commandList.controller.toggle, controller.onToggle.bind(controller));
@@ -93,6 +95,7 @@ controller.registerCommand(commandList.riotApiLibraries, libraries.onLibs.bind(l
 controller.registerCommand(commandList.endpointManager.endpoint, endpoint.onEndpoint.bind(endpoint));
 controller.registerCommand(commandList.endpointManager.endpoints, endpoint.onList.bind(endpoint));
 
+controller.registerCommand(commandList.resourcePost.resource, resourcePost.onResourcePostCommand.bind(resourcePost));
 // start bot
 bot.start().catch((reason: any) => {
     console.error(`Unable to run botty: ${reason}.`);
