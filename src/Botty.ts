@@ -74,7 +74,9 @@ export default class Botty {
             if (!message.channel.isSendable()) return;
             if (message.author && message.author.bot) return; // Ignore bot in general
             if (message.channel.type === Discord.ChannelType.DM) return; // Don't output DMs
-
+            if (!message.author || message.cleanContent) {
+                return console.warn(JSON.stringify(message,null, 2), new Error().stack);
+            }
             console.log(`${message.author.username}'s (${message.author.id}) message in ${message.channel} was deleted. Contents: \n${message.cleanContent}\n`);
         });
 
