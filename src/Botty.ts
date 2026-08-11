@@ -97,6 +97,7 @@ export default class Botty {
         this.client.on("messageUpdate", (oldMessage: Discord.OmitPartialGroupDMChannel<Discord.Message>, newMessage: Discord.OmitPartialGroupDMChannel<Discord.Message>) => {
             if (!oldMessage.channel.isSendable() || !newMessage.channel.isSendable()) return;
             if (levenshteinDistance(oldMessage.content || "", newMessage.content || "") === 0) return; // To prevent page turning and embed loading to appear in changelog
+            if (!newMessage.author || !oldMessage.author) { return console.warn(JSON.stringify(oldMessage), JSON.stringify(newMessage), new Error().stack); }
             if (!newMessage.author) { 
                 console.log(`Botty.ts: Message ${newMessage.url} doesn't have an author ???`);
                 return;
