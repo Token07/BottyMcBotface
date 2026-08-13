@@ -70,13 +70,11 @@ export default class Botty {
         this.client.on("guildBanAdd", (guildBan: Discord.GuildBan) => console.log(`${guildBan.user.username}#${guildBan.user.discriminator} (${guildBan.user.id}) has been banned from ${guildBan.guild.name}.`));
         this.client.on("guildBanRemove", (guildBan: Discord.GuildBan) => console.log(`${guildBan.user.username}#${guildBan.user.discriminator} (${guildBan.user.id}) has been unbanned from ${guildBan.guild.name}.`));
 
-        this.client.on("messageDelete", (message: Discord.OmitPartialGroupDMChannel<Discord.Message>) => {
+        this.client.on("messageDelete", (message: Discord.PartialMessage | Discord.Message) => {
             if (!message.channel.isSendable()) return;
+            if (!message.author || !message.content) return; // Message isn't cache, don't log because we dont have original message.
             if (message.author && message.author.bot) return; // Ignore bot in general
             if (message.channel.type === Discord.ChannelType.DM) return; // Don't output DMs
-            if (!message.author || message.cleanContent) {
-                return console.warn(JSON.stringify(message,null, 2), new Error().stack);
-            }
             console.log(`${message.author.username}'s (${message.author.id}) message in ${message.channel} was deleted. Contents: \n${message.cleanContent}\n`);
         });
 
