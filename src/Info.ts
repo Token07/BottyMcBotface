@@ -531,12 +531,82 @@ export default class Info {
             const responses = [...startsWithNotes, ...matchingNotes].map(info => { return {name: info.command, value: info.command} });
             return interaction.respond(responses.slice(0, 24)).catch((e) => console.error("Autocomplete interaction response failed", e.stack));
         }
+        if (this.adminCommands.includes(noteName.split(" ")[0])) return this.adminInteraction(interaction);
         if (!this.validateNoteName(noteName)) return interaction.reply({content: "This note name is not valid", flags: Discord.MessageFlags.Ephemeral});
+
         const infoData = this.fetchInfo(noteName)
         if (infoData) return interaction.reply({content: this.prepareNote(infoData), ephemeral})
         interaction.reply({content: "Something went wrong", flags: Discord.MessageFlags.Ephemeral});
     }
+    public async adminInteraction(interaction: Discord.ChatInputCommandInteraction) {
+        const command = interaction.options.get("name")?.value?.toString().toLocaleLowerCase() || "";
 
+        if (command.startsWith("replace") || command.startsWith("add")) {
+            const customId = (command == "replace") ? "noteAdminReplace" : "noteAdminAdd";
+            const title = (command == "replace") ? "Replace Note" : "Add Note";
+            const modal = new Discord.ModalBuilder()
+                .setCustomId(customId)
+                .setTitle(title);
+            const nameInput = new Discord.TextInputBuilder()
+                .setCustomId('nameTextInput')
+                .setStyle(Discord.TextInputStyle.Short)
+                .setRequired(true)
+                .setPlaceholder("Name of the note");
+            const nameLabel = new Discord.LabelBuilder()
+                .setLabel("What note would you like to " + ((command == "replace") ? "replace" : "add") + "?")
+                .setTextInputComponent(nameInput);
+            const contentInput = new Discord.TextInputBuilder()
+                .setCustomId("contentInput")
+                .setStyle(Discord.TextInputStyle.Paragraph)
+                .setRequired(true);
+            const contentLabel = new Discord.LabelBuilder()
+                .setLabel("Text")
+                .setTextInputComponent(contentInput);
+            const categoryMenu = new Discord.StringSelectMenuBuilder()
+                .setCustomId("category")
+                .setPlaceholder("Choose a category")
+                .addOptions(this.categories.map(category => {
+                    return {
+                        label: category.explanation,
+                        value: category.explanation,
+                        emoji: category.icon
+                    }
+                }));
+            const categoryLabel = new Discord.LabelBuilder()
+                .setLabel("Category")
+                .setStringSelectMenuComponent(categoryMenu);
+
+            // See if a note name was specified
+            // workaround to avoiding a second field on command
+            let noteName = command.split(" ")
+            if (noteName.length == 2) {
+                nameInput.setValue(noteName[1]);
+                const infoData = this.fetchInfo(noteName[1], true);
+                if (infoData) {
+                    contentInput.setValue(infoData?.message);
+                    categoryMenu.setOptions(categoryMenu.options.map(option => {
+                        if (option.data.value == infoData.categoryId) {
+                            option.setDefault(true);
+                        }
+                        return option;
+                    }));
+                }
+                }
+
+            modal.addLabelComponents(nameLabel, contentLabel, categoryLabel);
+
+            await interaction.showModal(modal);
+        }
+        else if (command == "remove") {
+            const modal = new Discord.ModalBuilder().setCustomId('noteAdminRemove').setTitle('Remove Note');
+            const nameInput = new Discord.TextInputBuilder().setCustomId('nameTextInput').setPlaceholder("Note name");
+            const nameLabel = new Discord.LabelBuilder().setLabel("What note would you like to remove?").setTextInputComponent(nameInput);
+
+            modal.addLabelComponents(nameLabel);
+
+            await interaction.showModal(modal);
+        }
+    }
     private addRecent(infoData: InfoData) {
         if (!this.recents) {
             this.recents = [];
