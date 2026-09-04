@@ -590,18 +590,27 @@ export default class Info {
                 const infoData = this.fetchInfo(noteName[1], true);
                 if (infoData) {
                     contentInput.setValue(infoData?.message);
-                    categoryMenu.setOptions(categoryMenu.options.map(option => {
+                    /* categoryMenu.setOptions(categoryMenu.options.map(option => {
+                        let cat;
                         if (option.data.label == infoData.categoryId) {
                             option.setDefault(true);
                         }
                         return option;
-                    }));
+                    }));*/
+                    categoryMenu.setOptions(this.categories.map(category => {
+                    return {
+                        label: category.explanation,
+                        value: category.explanation,
+                        emoji: category.icon,
+                        default: (infoData.categoryId == category.explanation) ? true : undefined
+                    }
+                }));
                 }
-                }
+            }
 
             modal.addLabelComponents(nameLabel, contentLabel, categoryLabel);
 
-            await interaction.showModal(modal);
+            await interaction.showModal(modal).catch((e) => console.error(e, e.stack));
         }
         else if (command == "remove") {
             const modal = new Discord.ModalBuilder().setCustomId('noteAdminRemove').setTitle('Remove Note');
