@@ -256,7 +256,9 @@ export default class SpamKiller {
             const embed = SpamKillerEmbeds.warnEmbed("Robot Check", "We require users to verify that they are human before they are allowed to post an attachment. " +
                 "If you are a human, react with :+1: to this message to gain link privileges. If you are a bot, please go spam somewhere else. 👍");
             this.addViolatingMessage(message, {content: `Hey, ${message.author} If you are a human, react with :+1: to this message`, embeds: [embed] });
+            return true;
         }
+        return false;
     }
     checkForLinks(message: Discord.Message) {
         const httpOffset = message.content.indexOf("http://");
