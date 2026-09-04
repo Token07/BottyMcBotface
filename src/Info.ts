@@ -591,7 +591,7 @@ export default class Info {
                 if (infoData) {
                     contentInput.setValue(infoData?.message);
                     categoryMenu.setOptions(categoryMenu.options.map(option => {
-                        if (option.data.value == infoData.categoryId) {
+                        if (option.data.label == infoData.categoryId) {
                             option.setDefault(true);
                         }
                         return option;
