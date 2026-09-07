@@ -2,6 +2,7 @@ import { fileBackedObject } from "./FileBackedObject";
 import { SharedSettings } from "./SharedSettings";
 
 import url = require("url");
+import { randomUUID } from 'crypto';
 
 import Botty from "./Botty";
 import CategorisedMessage from "./CategorisedMessage";
@@ -551,7 +552,7 @@ export default class Info {
             const customId = (command == "replace") ? "noteAdminReplace" : "noteAdminAdd";
             const title = (command == "replace") ? "Replace Note" : "Add Note";
             const modal = new Discord.ModalBuilder()
-                .setCustomId(customId)
+                .setCustomId(customId + ":" + randomUUID())
                 .setTitle(title);
             const nameInput = new Discord.TextInputBuilder()
                 .setCustomId('nameTextInput')
