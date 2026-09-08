@@ -621,7 +621,7 @@ export default class Info {
                         label: category.explanation,
                         value: category.explanation,
                         emoji: category.icon,
-                        default: (infoData.categoryId == category.explanation) ? true : undefined
+                        default: (infoData.categoryId == category.icon) ? true : undefined
                     }
                 }));
                 }
