@@ -552,8 +552,8 @@ export default class Info {
                 return this.fetchAutoComplete(autocompleteText.substring(autocompleteText.indexOf(" ")+1))
                 .map(entry => {
                     const startWord = autocompleteText.substring(0, autocompleteText.indexOf(" "))
-                    entry.name = startWord + autocompleteText
-                    entry.value = startWord + autocompleteText
+                    entry.name = startWord + entry.name
+                    entry.value = startWord + entry.value
                     return entry;
                 })
             }
