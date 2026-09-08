@@ -550,7 +550,7 @@ export default class Info {
                 autocompleteText.startsWith("replace ")
             ) {
                 return this.fetchAutoComplete(
-                    autocompleteText.substring(autocompleteText.indexOf(" " + 1)), autocompleteText)
+                    autocompleteText.substring(autocompleteText.indexOf(" ")+1), autocompleteText)
                 .map(entry => {
                     const startWord = autocompleteText.substring(0, autocompleteText.indexOf(" "))
                     entry.name = startWord + autocompleteText
