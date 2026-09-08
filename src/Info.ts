@@ -542,15 +542,14 @@ export default class Info {
         if (infoData) return interaction.reply({content: this.prepareNote(infoData), flags: ephemeral ? Discord.MessageFlags.Ephemeral : []})
         interaction.reply({content: "Something went wrong", flags: Discord.MessageFlags.Ephemeral});
     }
-    public fetchAutoComplete(autocompleteText: string, startswithText?: string): Array<{ name: string; value: string }>  {
+    public fetchAutoComplete(autocompleteText: string): Array<{ name: string; value: string }>  {
             if (autocompleteText == "") return [...new Set<string>(this.recents)].filter(r => r.length <= 100).slice(0, 24).map((r => { return {name: r, value: r} }));
             if (
                 autocompleteText.startsWith("add ") ||
                 autocompleteText.startsWith("remove ") || 
                 autocompleteText.startsWith("replace ")
             ) {
-                return this.fetchAutoComplete(
-                    autocompleteText.substring(autocompleteText.indexOf(" ")+1), autocompleteText)
+                return this.fetchAutoComplete(autocompleteText.substring(autocompleteText.indexOf(" ")+1))
                 .map(entry => {
                     const startWord = autocompleteText.substring(0, autocompleteText.indexOf(" "))
                     entry.name = startWord + autocompleteText
