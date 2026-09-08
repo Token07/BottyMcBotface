@@ -2,6 +2,7 @@ import { fileBackedObject } from "./FileBackedObject";
 import { SharedSettings } from "./SharedSettings";
 
 import url = require("url");
+import { randomUUID } from 'crypto';
 
 import Botty from "./Botty";
 import CategorisedMessage from "./CategorisedMessage";
@@ -525,18 +526,36 @@ export default class Info {
         const ephemeral = interaction.options.get("ephemeral")?.value as boolean ?? false;
         if (interaction.isAutocomplete()) {
             const autocompleteText = interaction.options.getFocused(true).value;
-            if (autocompleteText == "") return interaction.respond([...new Set<string>(this.recents)].filter(r => r.length <= 100).slice(0, 24).map((r => { return {name: r, value: r} })));
-            const startsWithNotes = this.infos.filter(info => info.command.startsWith(autocompleteText));
-            const matchingNotes = this.infos.filter(info => !info.command.startsWith(autocompleteText) && info.command.indexOf(autocompleteText) !== -1);
-            const responses = [...startsWithNotes, ...matchingNotes].map(info => { return {name: info.command, value: info.command} });
+            const responses = this.fetchAutoComplete(autocompleteText);
             return interaction.respond(responses.slice(0, 24)).catch((e) => console.error("Autocomplete interaction response failed", e.stack));
         }
         if (this.adminCommands.includes(noteName.split(" ")[0])) return this.adminInteraction(interaction);
         if (!this.validateNoteName(noteName)) return interaction.reply({content: "This note name is not valid", flags: Discord.MessageFlags.Ephemeral});
 
         const infoData = this.fetchInfo(noteName)
-        if (infoData) return interaction.reply({content: this.prepareNote(infoData), ephemeral})
+        if (infoData) return interaction.reply({content: this.prepareNote(infoData), flags: ephemeral ? Discord.MessageFlags.Ephemeral : []})
         interaction.reply({content: "Something went wrong", flags: Discord.MessageFlags.Ephemeral});
+    }
+    public fetchAutoComplete(autocompleteText: string): Array<{ name: string; value: string }>  {
+            if (autocompleteText == "") return [...new Set<string>(this.recents)].filter(r => r.length <= 100).slice(0, 24).map((r => { return {name: r, value: r} }));
+            if (
+                autocompleteText.startsWith("add ") ||
+                autocompleteText.startsWith("remove ") || 
+                autocompleteText.startsWith("replace ")
+            ) {
+                return this.fetchAutoComplete(autocompleteText.substring(autocompleteText.indexOf(" ")+1))
+                .map(entry => {
+                    const startWord = autocompleteText.substring(0, autocompleteText.indexOf(" "))
+                    entry.name = startWord + " " + entry.name
+                    entry.value = startWord + " " + entry.value
+                    return entry;
+                })
+            }
+            const startsWithNotes = this.infos.filter(info => info.command.startsWith(autocompleteText));
+            const matchingNotes = this.infos.filter(info => !info.command.startsWith(autocompleteText) && info.command.indexOf(autocompleteText) !== -1);
+            const responses = [...startsWithNotes, ...matchingNotes].map(info => { return {name: info.command, value: info.command} });
+
+            return responses;
     }
     public async adminInteraction(interaction: Discord.ChatInputCommandInteraction) {
         const command = interaction.options.get("name")?.value?.toString().toLocaleLowerCase() || "";
@@ -545,7 +564,7 @@ export default class Info {
             const customId = (command == "replace") ? "noteAdminReplace" : "noteAdminAdd";
             const title = (command == "replace") ? "Replace Note" : "Add Note";
             const modal = new Discord.ModalBuilder()
-                .setCustomId(customId)
+                .setCustomId(customId + ":" + randomUUID())
                 .setTitle(title);
             const nameInput = new Discord.TextInputBuilder()
                 .setCustomId('nameTextInput')
@@ -576,26 +595,27 @@ export default class Info {
                 .setLabel("Category")
                 .setStringSelectMenuComponent(categoryMenu);
 
-            // See if a note name was specified
-            // workaround to avoiding a second field on command
-            let noteName = command.split(" ")
+            // See if a "note name" starts with an admin command
+            let noteName = command.split(" ");
             if (noteName.length == 2) {
                 nameInput.setValue(noteName[1]);
                 const infoData = this.fetchInfo(noteName[1], true);
                 if (infoData) {
                     contentInput.setValue(infoData?.message);
-                    categoryMenu.setOptions(categoryMenu.options.map(option => {
-                        if (option.data.value == infoData.categoryId) {
-                            option.setDefault(true);
-                        }
-                        return option;
-                    }));
+                    categoryMenu.setOptions(this.categories.map(category => {
+                    return {
+                        label: category.explanation,
+                        value: category.explanation,
+                        emoji: category.icon,
+                        default: (infoData.categoryId == category.icon) ? true : undefined
+                    }
+                }));
                 }
-                }
+            }
 
             modal.addLabelComponents(nameLabel, contentLabel, categoryLabel);
 
-            await interaction.showModal(modal);
+            await interaction.showModal(modal).catch((e) => console.error(e, e.stack));
         }
         else if (command == "remove") {
             const modal = new Discord.ModalBuilder().setCustomId('noteAdminRemove').setTitle('Remove Note');
