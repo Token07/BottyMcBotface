@@ -528,10 +528,7 @@ export default class Info {
             console.debug("Info.ts: Autocomplete interaction recieved at " + new Date().toLocaleString() + 
             "\nInteraction timestamp: "  + new Date(interaction.createdTimestamp).toLocaleString());
             const autocompleteText = interaction.options.getFocused(true).value;
-            if (autocompleteText == "") return interaction.respond([...new Set<string>(this.recents)].filter(r => r.length <= 100).slice(0, 24).map((r => { return {name: r, value: r} })));
-            const startsWithNotes = this.infos.filter(info => info.command.startsWith(autocompleteText));
-            const matchingNotes = this.infos.filter(info => !info.command.startsWith(autocompleteText) && info.command.indexOf(autocompleteText) !== -1);
-            const responses = [...startsWithNotes, ...matchingNotes].map(info => { return {name: info.command, value: info.command} });
+            const responses = this.fetchAutoComplete(autocompleteText);
             const rTime = new Date();
             return interaction.respond(responses.slice(0, 24)).catch((e) => console.error("Autocomplete interaction response failed", e.stack)).then( () => {
                 console.debug("Info.ts: Autocomplete interaction submitted at: " + rTime.toLocaleString() + 
@@ -544,6 +541,28 @@ export default class Info {
         const infoData = this.fetchInfo(noteName)
         if (infoData) return interaction.reply({content: this.prepareNote(infoData), flags: ephemeral ? Discord.MessageFlags.Ephemeral : []})
         interaction.reply({content: "Something went wrong", flags: Discord.MessageFlags.Ephemeral});
+    }
+    public fetchAutoComplete(autocompleteText: string, startswithText?: string): Array<{ name: string; value: string }>  {
+            if (autocompleteText == "") return [...new Set<string>(this.recents)].filter(r => r.length <= 100).slice(0, 24).map((r => { return {name: r, value: r} }));
+            if (
+                autocompleteText.startsWith("add ") ||
+                autocompleteText.startsWith("remove ") || 
+                autocompleteText.startsWith("replace ")
+            ) {
+                return this.fetchAutoComplete(
+                    autocompleteText.substring(autocompleteText.indexOf(" " + 1)), autocompleteText)
+                .map(entry => {
+                    const startWord = autocompleteText.substring(0, autocompleteText.indexOf(" "))
+                    entry.name = startWord + autocompleteText
+                    entry.value = startWord + autocompleteText
+                    return entry;
+                })
+            }
+            const startsWithNotes = this.infos.filter(info => info.command.startsWith(autocompleteText));
+            const matchingNotes = this.infos.filter(info => !info.command.startsWith(autocompleteText) && info.command.indexOf(autocompleteText) !== -1);
+            const responses = [...startsWithNotes, ...matchingNotes].map(info => { return {name: info.command, value: info.command} });
+
+            return responses;
     }
     public async adminInteraction(interaction: Discord.ChatInputCommandInteraction) {
         const command = interaction.options.get("name")?.value?.toString().toLocaleLowerCase() || "";
