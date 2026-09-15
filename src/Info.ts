@@ -36,7 +36,16 @@ class ReactionListener {
     public callback: (emoji: Discord.ReactionEmoji | Discord.Emoji, listener: ReactionListener) => void;
 }
 
+class InfoError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "InfoError";
+        Object.setPrototypeOf(this, InfoError.prototype);
+    }
+}
+
 export default class Info {
+    private botty: Botty;
     private userId: string;
     private infos: InfoData[];
     private categories: Category[] = [];
@@ -53,6 +62,7 @@ export default class Info {
 
     constructor(botty: Botty, interactionManager: InteractionManager, sharedSettings: SharedSettings, userFile: string, versionChecker: VersionChecker) {
         console.log("Requested Info extension..");
+        this.botty = botty;
         this.command = sharedSettings.info.command;
         this.versionChecker = versionChecker;
         this.sharedSettings = sharedSettings;
@@ -91,6 +101,7 @@ export default class Info {
                 });
             }
         });
+        botty.client.on("interactionCreate", this.adminModalSubmit.bind(this));
         const command = new Discord.SlashCommandBuilder()
         .setName("note")
         .setDescription("Infos")
@@ -268,7 +279,25 @@ export default class Info {
 
         message.channel.send("Unable to find note with that name!");
     }
+    // This one is intended for interactions
+    // TODO: Combine handleNoteReplace functions
+    private handleNoteReplace2(noteName: string, body: string, category: string) {
+        noteName = noteName.toLowerCase();
 
+        if (!this.validateNoteName(noteName)) { throw new Error("This note name is not valid"); }
+
+        const info = this.infos.find(inf => {
+            return inf.command === noteName;
+        });
+
+        if (info) {
+            info.message = body
+            info.categoryId = category
+
+            return true;
+        }
+        throw new InfoError("Could not find a note with the name " + noteName);
+    }
     private handleNoteRename(message: Discord.Message, isAdmin: boolean, command: string, args: string[]) {
         if (!message.channel.isSendable()) return;
         // we need 3 arguments to rename a note.
@@ -376,6 +405,31 @@ export default class Info {
         for (const category of this.categories)
             await reply.react(category.icon).catch((reason) => console.log(`Cannot react with category '${category}', reason being: ${reason}`));
         return;
+    }
+
+    private handleNoteAdd2(name: string, text: string, category: string) {
+        name = name.toLowerCase();
+        let emoji;
+        if (this.adminCommands.indexOf(name) >= 0 || this.badNoteNames.indexOf(name) >= 0) {
+            throw new InfoError("This note is a note command or a disallowed note name, and cannot be used.");
+        }
+        if (!category) {
+            throw new InfoError("The requested category could not be found");
+        }
+        if (!this.categories.find(c => c.icon == category)) {
+            throw new InfoError("The requested category could not be parsed");
+        }
+        // addInfo only checks for the 'identifier' property
+        if (category.indexOf("%") >= 0) {
+            emoji = category
+        }
+        else if (category.indexOf(":") >= 0){
+            emoji = this.botty.client.emojis.cache.get(category.split(":")[1]);
+        }
+        if (!emoji) {
+            throw new InfoError("The requested category could not be parsed");
+        }
+        return this.addInfo(name, text, emoji as any );
     }
 
     private addInfo(command: string, message: string, category: Discord.Emoji) {
@@ -529,7 +583,7 @@ export default class Info {
             const responses = this.fetchAutoComplete(autocompleteText);
             return interaction.respond(responses.slice(0, 24)).catch((e) => console.error("Autocomplete interaction response failed", e.stack));
         }
-        if (this.adminCommands.includes(noteName.split(" ")[0])) return this.adminInteraction(interaction);
+        if (this.adminCommands.includes(noteName.split(" ")[0])) return this.adminInteraction(interaction, noteName.split(" ")[0]);
         if (!this.validateNoteName(noteName)) return interaction.reply({content: "This note name is not valid", flags: Discord.MessageFlags.Ephemeral});
 
         const infoData = this.fetchInfo(noteName)
@@ -557,8 +611,8 @@ export default class Info {
 
             return responses;
     }
-    public async adminInteraction(interaction: Discord.ChatInputCommandInteraction) {
-        const command = interaction.options.get("name")?.value?.toString().toLocaleLowerCase() || "";
+    public async adminInteraction(interaction: Discord.ChatInputCommandInteraction, command: string) {
+        //const command = interaction.options.get("name")?.value?.toString().toLocaleLowerCase() || "";
 
         if (command.startsWith("replace") || command.startsWith("add")) {
             const customId = (command == "replace") ? "noteAdminReplace" : "noteAdminAdd";
@@ -587,7 +641,7 @@ export default class Info {
                 .addOptions(this.categories.map(category => {
                     return {
                         label: category.explanation,
-                        value: category.explanation,
+                        value: category.icon,
                         emoji: category.icon
                     }
                 }));
@@ -596,7 +650,7 @@ export default class Info {
                 .setStringSelectMenuComponent(categoryMenu);
 
             // See if a "note name" starts with an admin command
-            let noteName = command.split(" ");
+            let noteName = interaction.options.get("name")?.value?.toString().toLocaleLowerCase().split(" ") || [];
             if (noteName.length == 2) {
                 nameInput.setValue(noteName[1]);
                 const infoData = this.fetchInfo(noteName[1], true);
@@ -605,7 +659,7 @@ export default class Info {
                     categoryMenu.setOptions(this.categories.map(category => {
                     return {
                         label: category.explanation,
-                        value: category.explanation,
+                        value: category.icon,
                         emoji: category.icon,
                         default: (infoData.categoryId == category.icon) ? true : undefined
                     }
@@ -625,6 +679,47 @@ export default class Info {
             modal.addLabelComponents(nameLabel);
 
             await interaction.showModal(modal);
+        }
+    }
+    public async adminModalSubmit(modal: Discord.Interaction) {
+        if (!modal.isModalSubmit()) return;
+        if (!modal.customId.startsWith("noteAdminReplace") && !modal.customId.startsWith("noteAdminAdd")) return;
+        if (!modal.guild) {
+            await modal.reply("This command only works in a guild context.");
+            return;
+        }
+
+        const guildMember = modal.guild.members.cache.find(u => u.id === modal.user.id);
+        if (!guildMember) {
+            await modal.reply({content: "I was unable to verify your roles, try again.", flags: Discord.MessageFlags.Ephemeral});
+            return;
+        }
+
+        if (!this.sharedSettings.commands.adminRoles.some(x => guildMember.roles.cache.has(x)))  {
+            await modal.reply({content: "You don't have access to perform this action.", flags: Discord.MessageFlags.Ephemeral});
+            return;
+        }
+
+        const noteName = modal.fields.getTextInputValue("nameTextInput");
+        const noteDesc = modal.fields.getTextInputValue("contentInput");
+        const noteCategory = modal.fields.getStringSelectValues("category");
+
+        if (modal.customId.startsWith("noteAdminReplace")) {
+            try {
+                this.handleNoteReplace2(noteName, noteDesc, noteCategory[0]);
+                await modal.reply(`Note '${noteName}' has been changed to:\n${noteDesc}`);
+            }
+            catch (e) {
+                if (e instanceof InfoError) {
+                    await modal.reply({content: e.message}).catch(e => console.error(e));
+                    return;
+                }
+                console.error(e, e.stack);
+                await modal.reply({content: "An error occurred", flags: Discord.MessageFlags.Ephemeral}).catch(e => console.error(e));
+            }
+        }
+        else if (modal.customId.startsWith("noteAdminAdd")) {
+            await modal.reply({content: this.handleNoteAdd2(noteName, noteDesc, noteCategory[0]) }).catch(e => console.error(e, e.stack));
         }
     }
     private addRecent(infoData: InfoData) {
