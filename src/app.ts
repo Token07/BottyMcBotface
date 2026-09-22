@@ -18,7 +18,7 @@ import { CommandList } from "./CommandController";
 import { overrideFileBackedObject, fileBackedObject } from "./FileBackedObject";
 import { SharedSettings } from "./SharedSettings";
 import SpamKiller from "./SpamKiller";
-import Admin from "./Admin";
+// import Admin from "./Admin";
 import GameData from "./GameData";
 import InteractionManager from "./InteractionManager";
 import ResourcePost from "./ResourcePost";
@@ -39,7 +39,7 @@ const keyFinder = new KeyFinder(bot.client, sharedSettings, "data/riot_keys.json
 const versionChecker = new VersionChecker(bot.client, sharedSettings, "data/version_data.json");
 const notes = new Info(bot, interactionManager, sharedSettings, "data/info_data.json", versionChecker);
 const apiUrlInterpreter = new ApiUrlInterpreter(bot.client, sharedSettings, apiSchema, notes);
-const admin = new Admin(bot.client, sharedSettings, "data/admin_data.json", notes);
+// const admin = new Admin(bot.client, sharedSettings, "data/admin_data.json", notes);
 const react = new AutoReact(bot.client, interactionManager, sharedSettings, "data/thinking_data.json", "data/ignored_react_data.json");
 const status = new ApiStatus(sharedSettings);
 const libraries = new RiotAPILibraries(sharedSettings);
@@ -61,11 +61,11 @@ controller.registerCommand(commandList.botty.restart, bot.onRestart.bind(bot));
 controller.registerCommand(commandList.gamedata.lookup, gameData.onLookup.bind(gameData));
 
 // Admin commands
-controller.registerCommand(commandList.admin.unmute, admin.onUnmute.bind(admin));
+/* controller.registerCommand(commandList.admin.unmute, admin.onUnmute.bind(admin));
 controller.registerCommand(commandList.admin.mute, admin.onMute.bind(admin));
 controller.registerCommand(commandList.admin.ticket, admin.onTicket.bind(admin));
 controller.registerCommand(commandList.admin.kick, admin.onKick.bind(admin));
-controller.registerCommand(commandList.admin.ban, admin.onBan.bind(admin));
+controller.registerCommand(commandList.admin.ban, admin.onBan.bind(admin)); */
 
 // Esport commands
 controller.registerCommand(commandList.esports.date, esports.onCheckNext.bind(esports));
