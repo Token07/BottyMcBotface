@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Botty McBotface Privacy Policy</title>
+<meta name="description" content="Privacy policy for Botty McBotface, the Discord bot for the Riot Games Third Party Developer Community.">
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #1f2328;
+    --muted: #59636e;
+    --border: #d1d9e0;
+    --accent: #0969da;
+    --code-bg: #f6f8fa;
+    --row-alt: #f6f8fa;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1117;
+      --fg: #e6edf3;
+      --muted: #9198a1;
+      --border: #3d444d;
+      --accent: #4493f8;
+      --code-bg: #151b23;
+      --row-alt: #151b23;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  }
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 40px 16px 64px;
+  }
+  h1 { font-size: 2rem; line-height: 1.25; margin: 0 0 4px; }
+  h2 {
+    font-size: 1.35rem;
+    margin: 2.2em 0 0.6em;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid var(--border);
+  }
+  p, ul { margin: 0 0 1em; }
+  ul { padding-left: 1.4em; }
+  li { margin-bottom: 0.4em; }
+  .updated { color: var(--muted); margin-bottom: 2em; }
+  code {
+    font: 0.9em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.1em 0.35em;
+  }
+  .table-wrap { overflow-x: auto; margin: 0 0 1em; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  th, td {
+    text-align: left;
+    vertical-align: top;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+  }
+  th { background: var(--code-bg); }
+  tbody tr:nth-child(even) { background: var(--row-alt); }
+  td:first-child { min-width: 260px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+
+<h1>Botty McBotface Privacy Policy</h1>
+<p class="updated">Last updated: 2026-10-17</p>
+
+<p>Botty McBotface ("the bot") is a Discord bot run by the staff of the Riot Games Third Party Developer Community Discord server ("the server", "we", "us"). The bot runs in that server and in a public development server (Botty Development), which is used for testing and to receive the bot's logs. The log channels in the development server are restricted to server staff. It cannot be added to other servers. This policy applies to both servers.</p>
+
+<p>The server has been run by community volunteers since August 2021. The bot is operated by the server's community staff, not by Riot Games, and Riot Games is not responsible for the bot or for how it handles your data. This policy explains what data the bot accesses, what it keeps, and why.</p>
+
+<h2>What the bot can see</h2>
+
+<p>While you are a member of the server, Discord gives the bot access to:</p>
+<ul>
+  <li><strong>Messages</strong> you post in channels the bot can read, including their text, attachments and links, and when they are edited or deleted.</li>
+  <li><strong>Member information</strong>: your user ID, username, display name and nickname, roles, and when you join or leave the server or are banned.</li>
+  <li><strong>Reactions</strong> you add to messages.</li>
+  <li><strong>Commands</strong> you use, including slash commands.</li>
+</ul>
+<p>The bot does not access your presence or activity status, your voice activity, or your direct messages with other users.</p>
+
+<h2>How the bot uses this data</h2>
+
+<p><strong>Moderation and security.</strong> The bot scans messages to detect and remove spam, scams, phishing links, and similar abuse. This includes:</p>
+<ul>
+  <li>Rule-based filters, such as blocked links, invite spam, and the same message posted across multiple channels.</li>
+  <li>A self-hosted spam classifier that scores each message. The classifier processes message text in memory only and does not store it.</li>
+</ul>
+<p>When a message is removed, the bot posts a notice, and the removed message is logged to a staff-only channel. Staff and trusted roles are exempt from spam filtering.</p>
+
+<p><strong>Leaked API key protection.</strong> If you post an API key in a public channel by mistake, the bot reports it to a staff-only channel so staff can warn you.</p>
+
+<p><strong>Moderation logging (trust and safety).</strong> Member joins, leaves, bans, name changes, and edited or deleted messages are logged to staff-only channels. This lets staff investigate spam waves, raids, impersonation, compromised accounts, and other abuse, and keep a record of moderation actions.</p>
+
+<p><strong>Features you use.</strong> The bot reads messages to react to greetings and 🤔 messages. When you use a command, the bot processes the options you give it, such as a name or date to look up, only to run that command.</p>
+
+<p><strong>API URLs you paste.</strong> If you paste a game API URL, the bot makes that request using the bot's own API key and posts the response in the channel. No information about you is sent with the request. If the URL you paste contains your own API key, that key is sent as part of the URL. It is also visible in the bot's reply and will be reported as a leaked key (see above), so don't include keys in URLs you paste.</p>
+
+<h2>Third-party services</h2>
+
+<p>To provide its features, the bot makes requests to public services, including Riot Games, CommunityDragon, and GitHub. Most of this data is fetched on a schedule and cached. Requests made because of a command contain only what the command needs (for example, a programming language name) and no information about you, except for API URLs you paste yourself, described above.</p>
+
+<h2>What we store, and for how long</h2>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>Data</th><th>Purpose</th><th>Kept for</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>API keys detected in messages, with your user ID, the channel, and the time posted</td>
+      <td>Leaked key protection</td>
+      <td>Until the key is no longer valid, then deleted automatically</td>
+    </tr>
+    <tr>
+      <td>Message ID and spam score from the classifier (no message text, no username)</td>
+      <td>Spam statistics</td>
+      <td>Indefinitely, for long-term spam statistics</td>
+    </tr>
+    <tr>
+      <td>User IDs of members who opted out of the bot's reactions (<code>/toggle_react</code>) or chose default thinking emoji reactions (<code>/toggle_thinking</code>)</td>
+      <td>Respecting your reaction preferences</td>
+      <td>Until you run the same command again, which deletes your user ID from the list</td>
+    </tr>
+    <tr>
+      <td>System logs on the bot's host, which can include member join, leave, and name change events, detected API keys, and message text from edited, deleted, or removed messages</td>
+      <td>Troubleshooting</td>
+      <td>30 days</td>
+    </tr>
+    <tr>
+      <td>Bot logs posted to staff-only Discord channels in the server and in the Botty Development server, including removed spam, detected API keys, member joins and leaves, name changes, edited and deleted messages, and other application log output</td>
+      <td>Trust and safety, moderation, and troubleshooting</td>
+      <td>Indefinitely, on Discord</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>Messages are not otherwise stored by the bot.</p>
+
+<h2>Who can access your data</h2>
+
+<ul>
+  <li><strong>Server staff (Gurus and Admins)</strong> can see the bot's staff-only log channels, including removed messages, detected API keys, and moderation logs. Staff include volunteers from the developer community and some Riot Games employees.</li>
+  <li><strong>The bot's maintainer</strong>, who is the only person with access to the bot's host, can access the bot's stored data files, spam classifier statistics, and system logs.</li>
+  <li><strong>Discord</strong> stores everything the bot posts to Discord channels, under Discord's own privacy policy.</li>
+</ul>
+<p>No one else has access to the data the bot stores.</p>
+
+<h2>What we don't do</h2>
+
+<ul>
+  <li>We do not sell your data, and we do not share it with anyone outside the people listed under "Who can access your data".</li>
+  <li>Botty McBotface does not use your data, including message content, to train machine learning or AI models. Its spam classifier is built from a hand-curated dataset, not from data the bot collects.</li>
+  <li>We do not use your data for advertising or profiling.</li>
+</ul>
+
+<h2>Security</h2>
+
+<p>All data the bot stores, including data files, spam classifier statistics, and system logs, is kept on a server with full-disk encryption.</p>
+
+<h2>Your choices</h2>
+
+<ul>
+  <li>You can opt out of the bot's emoji reactions with <code>/toggle_react</code>.</li>
+  <li>You can have the bot react to your 🤔 messages with the default thinking emoji instead of custom ones with <code>/toggle_thinking</code>.</li>
+  <li>Running either command again reverses it and deletes your stored preference.</li>
+  <li>Message scanning for spam, scams, and leaked keys applies to all members and cannot be opted out of, because it protects the whole server.</li>
+</ul>
+
+<h2>Deletion requests</h2>
+
+<p>Most of the data the bot keeps is held for trust and safety purposes, such as spam records and moderation logs. These records are generally retained for those purposes and may not be deleted on request. Your reaction preferences can be removed at any time by running <code>/toggle_react</code> or <code>/toggle_thinking</code> again, or on request.</p>
+
+<p>To ask about your data or request deletion, contact any Guru or Admin in the server.</p>
+
+<h2>Changes to this policy</h2>
+
+<p>We may update this policy when the bot changes. The "Last updated" date at the top shows the latest revision.</p>
+
+<h2>Contact</h2>
+
+<p>Questions about this policy can be sent to any Guru or Admin in the server.</p>
+
+</main>
+</body>
+</html>
