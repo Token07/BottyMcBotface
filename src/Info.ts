@@ -197,7 +197,7 @@ export default class Info {
             //this.recents.push(infoData?.command!);
             if (this.recents.length > 24) { this.recents.splice(0, this.recents.length-24); }
             if (!message.channel.isSendable()) return;
-            await message.channel.send(response);
+            await message.channel.send(response + "\n-# (using the chat command for notes is deprecated, please use the slash command)");
         }
         catch (e) {
             if (e instanceof Discord.DiscordAPIError) {
