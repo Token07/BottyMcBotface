@@ -129,11 +129,16 @@ export default class GameData {
     }
 
     public async reloadData() {
-        this.champData = await this.loadChampionData();
-        this.perkData = await this.loadPerkData();
-        this.itemData = await this.loadItemData();
-        this.summonerSpellData = await this.loadSummonerSpellData();
-        console.log("Game data loaded!");
+        try {
+            this.champData = await this.loadChampionData();
+            this.perkData = await this.loadPerkData();
+            this.itemData = await this.loadItemData();
+            this.summonerSpellData = await this.loadSummonerSpellData();
+            console.log("Game data loaded!");
+        }
+        catch (e) {
+            console.warn(e, e.stack);
+        }
     }
 
     public async loadChampionData(): Promise<ChampionDataContainer[]> {
