@@ -137,7 +137,7 @@ export default class GameData {
     }
 
     public async loadChampionData(): Promise<ChampionDataContainer[]> {
-        const champions = await fetch(this.sharedSettings.lookup.championUrl).then(x => x.json());
+        const champions = await fetch(this.sharedSettings.lookup.championUrl).then(x => x.json()).catch(e => console.warn(e, e.stack));
 
         const returnData: ChampionDataContainer[] = champions
             .filter((c: any) => c.id > 0)
